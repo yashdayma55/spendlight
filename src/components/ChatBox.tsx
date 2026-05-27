@@ -67,7 +67,7 @@ export default function ChatBox({ onNewLog }: { onNewLog: (log: GovernanceLog) =
     setMessages(updatedMessages);
     setInput("");
     setLoading(true);
-    penny.setThinking();
+    penny.showLoading();
 
     try {
       const response = await fetch("/api/chat", {
@@ -113,7 +113,10 @@ export default function ChatBox({ onNewLog }: { onNewLog: (log: GovernanceLog) =
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-6">
+    <div
+      className="bg-white rounded-2xl border border-gray-200 p-6"
+      onClick={(e) => e.stopPropagation()}
+    >
       <div className="flex items-center gap-2 mb-4">
         <span className="text-lg">✦</span>
         <h2 className="text-base font-semibold text-gray-800">

@@ -6,7 +6,7 @@ import ChatBox from "@/components/ChatBox";
 import StoryMode from "@/components/StoryMode";
 import GovernanceLog from "@/components/GovernanceLog";
 import { GovernanceLog as GovernanceLogType } from "@/components/GovernanceLog";
-import { PennyProvider } from "@/components/PennyContext";
+import { PennyProvider, usePenny } from "@/components/PennyContext";
 import PennyIntro from "@/components/PennyIntro";
 import AboutSection from "@/components/AboutSection";
 import { FISCAL_METADATA } from "@/lib/data";
@@ -25,21 +25,34 @@ function StatCard({ label, value }: { label: string; value: string }) {
   );
 }
 
-export default function Home() {
-  const [logs, setLogs] = useState<GovernanceLogType[]>([]);
-
-  const addLog = (log: GovernanceLogType) => {
-    setLogs((prev) => [...prev, log]);
-  };
-
+function HomeContent({
+  logs,
+  addLog,
+}: {
+  logs: GovernanceLogType[];
+  addLog: (log: GovernanceLogType) => void;
+}) {
+  const penny = usePenny();
   const totalB = (FISCAL_METADATA.total_spend / 1e9).toFixed(1);
 
   return (
-    <PennyProvider onNewLog={addLog}>
+    <>
       <PennyIntro />
-      <main className="min-h-screen bg-gray-50 pb-32">
+      <main
+        className="min-h-screen bg-gray-50 pb-32"
+        onClick={(e) => {
+          const target = e.target as HTMLElement;
+          const isBackground =
+            target.tagName === "MAIN" ||
+            target.classList.contains("bg-gray-50") ||
+            target.closest(".dismiss-penny") !== null;
+          if (isBackground) {
+            penny.dismiss();
+          }
+        }}
+      >
         <div className="max-w-5xl mx-auto px-4 py-10">
-          <div className="mb-8">
+          <div className="mb-8 dismiss-penny">
             <p className="text-xs font-mono text-gray-400 uppercase tracking-widest mb-1">
               Washington State · Fiscal Year 2022
             </p>
@@ -54,12 +67,12 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+          <div
+            className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6"
+            onClick={(e) => e.stopPropagation()}
+          >
             <StatCard label="Total spend" value={`$${totalB}B`} />
-            <StatCard
-              label="Largest agency"
-              value="Health Care Authority"
-            />
+            <StatCard label="Largest agency" value="Health Care Authority" />
             <StatCard
               label="Vendors paid"
               value={formatNumber(FISCAL_METADATA.num_vendors)}
@@ -67,29 +80,45 @@ export default function Home() {
             <StatCard label="Biggest category" value="Grants & Benefits" />
           </div>
 
-          <div className="mb-6">
+          <div className="mb-6" onClick={(e) => e.stopPropagation()}>
             <StoryMode onNewLog={addLog} />
           </div>
 
-          <div className="mb-6">
+          <div className="mb-6" onClick={(e) => e.stopPropagation()}>
             <Charts />
           </div>
 
-          <div className="mb-6">
+          <div className="mb-6" onClick={(e) => e.stopPropagation()}>
             <ChatBox onNewLog={addLog} />
           </div>
 
-          <div className="mb-6">
+          <div className="mb-6" onClick={(e) => e.stopPropagation()}>
             <GovernanceLog logs={logs} />
           </div>
 
-          <AboutSection />
+          <div onClick={(e) => e.stopPropagation()}>
+            <AboutSection />
+          </div>
 
-          <p className="text-center text-xs text-gray-300 mt-8">
+          <p className="text-center text-xs text-gray-300 mt-8 dismiss-penny">
             Built with Next.js · RAG · Claude API · Washington State Open Data
           </p>
         </div>
       </main>
+    </>
+  );
+}
+
+export default function Home() {
+  const [logs, setLogs] = useState<GovernanceLogType[]>([]);
+
+  const addLog = (log: GovernanceLogType) => {
+    setLogs((prev) => [...prev, log]);
+  };
+
+  return (
+    <PennyProvider onNewLog={addLog}>
+      <HomeContent logs={logs} addLog={addLog} />
     </PennyProvider>
   );
 }

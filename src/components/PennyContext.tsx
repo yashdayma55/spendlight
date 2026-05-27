@@ -4,8 +4,6 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
-  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -13,12 +11,37 @@ import { CLAUDE_MODEL } from "@/lib/claude";
 import { PennyCharacter, type PennyAnimation } from "./Penny";
 import type { GovernanceLog } from "./GovernanceLog";
 
-const BUBBLE_DISMISS_MS = 8000;
+export const PENNY_INTRO =
+  "Hi! I'm Penny, your spending guide 👋 Washington State spent $29.5B in FY2022 across 65,494 vendors. Click any chart bar, data point, or pie slice and I'll explain exactly what it means in plain English!";
+
+function ThinkingBubble() {
+  return (
+    <div className="flex items-center gap-1">
+      <span className="text-sm text-gray-500">Penny is thinking</span>
+      <div className="flex gap-0.5">
+        <div
+          className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"
+          style={{ animationDelay: "0ms" }}
+        />
+        <div
+          className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"
+          style={{ animationDelay: "150ms" }}
+        />
+        <div
+          className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"
+          style={{ animationDelay: "300ms" }}
+        />
+      </div>
+    </div>
+  );
+}
 
 interface PennyContextValue {
   explain: (context: string) => Promise<void>;
   speak: (text: string) => void;
-  setThinking: () => void;
+  showIntroduction: () => void;
+  showLoading: () => void;
+  dismiss: () => void;
 }
 
 const PennyContext = createContext<PennyContextValue | null>(null);
@@ -40,51 +63,45 @@ export function PennyProvider({
 }) {
   const [animation, setAnimation] = useState<PennyAnimation>("idle");
   const [bubbleText, setBubbleText] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [bubbleVisible, setBubbleVisible] = useState(false);
-  const dismissTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const clearDismissTimer = useCallback(() => {
-    if (dismissTimer.current) {
-      clearTimeout(dismissTimer.current);
-      dismissTimer.current = null;
-    }
+  const dismiss = useCallback(() => {
+    setBubbleVisible(false);
+    setIsLoading(false);
+    setBubbleText(null);
+    setAnimation("idle");
   }, []);
 
-  const hideBubble = useCallback(() => {
-    clearDismissTimer();
-    setBubbleVisible(false);
-    setTimeout(() => {
-      setBubbleText(null);
-      setAnimation("idle");
-    }, 200);
-  }, [clearDismissTimer]);
-
-  const showBubble = useCallback(
-    (text: string) => {
-      clearDismissTimer();
-      setBubbleText(text);
-      setBubbleVisible(true);
-      dismissTimer.current = setTimeout(hideBubble, BUBBLE_DISMISS_MS);
-    },
-    [clearDismissTimer, hideBubble]
-  );
+  const showBubbleContent = useCallback((text: string | null, loading: boolean) => {
+    setBubbleVisible(true);
+    setIsLoading(loading);
+    setBubbleText(text);
+  }, []);
 
   const speak = useCallback(
     (text: string) => {
       setAnimation("talking");
-      showBubble(text);
+      setIsLoading(false);
+      setBubbleText(text);
+      setBubbleVisible(true);
     },
-    [showBubble]
+    []
   );
 
-  const setThinking = useCallback(() => {
+  const showIntroduction = useCallback(() => {
+    speak(PENNY_INTRO);
+  }, [speak]);
+
+  const showLoading = useCallback(() => {
     setAnimation("thinking");
-    setBubbleVisible(false);
-  }, []);
+    showBubbleContent(null, true);
+  }, [showBubbleContent]);
 
   const explain = useCallback(
     async (context: string) => {
-      setThinking();
+      setAnimation("thinking");
+      showBubbleContent(null, true);
 
       try {
         const response = await fetch("/api/chat", {
@@ -127,44 +144,62 @@ export function PennyProvider({
           user_message: `PENNY: ${context}`,
           chunks_used: [],
           context_length: 0,
-          error: error instanceof Error ? error.message : "Penny explain request failed",
+          error:
+            error instanceof Error ? error.message : "Penny explain request failed",
         });
       }
     },
-    [onNewLog, setThinking, speak]
+    [onNewLog, showBubbleContent, speak]
   );
 
-  useEffect(() => {
-    const onDocumentClick = () => {
-      if (bubbleVisible) hideBubble();
-    };
-    document.addEventListener("click", onDocumentClick);
-    return () => document.removeEventListener("click", onDocumentClick);
-  }, [bubbleVisible, hideBubble]);
+  const handlePennyClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    showIntroduction();
+  };
 
-  useEffect(() => () => clearDismissTimer(), [clearDismissTimer]);
+  const hasSpeech = bubbleVisible && (isLoading || bubbleText);
 
   return (
-    <PennyContext.Provider value={{ explain, speak, setThinking }}>
+    <PennyContext.Provider
+      value={{ explain, speak, showIntroduction, showLoading, dismiss }}
+    >
       {children}
       <div
-        className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-2 pointer-events-none"
+        className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-1"
         onClick={(e) => e.stopPropagation()}
       >
-        {bubbleText && (
+        {hasSpeech && (
           <div
-            className={`pointer-events-auto max-w-[280px] sm:max-w-xs bg-white border border-blue-100 rounded-2xl rounded-br-sm shadow-lg px-4 py-3 text-sm text-gray-700 leading-relaxed ${
-              bubbleVisible ? "penny-bubble-enter opacity-100" : "opacity-0"
+            className={`max-w-[280px] sm:max-w-xs bg-white border border-blue-100 rounded-2xl rounded-br-sm shadow-lg px-4 py-3 text-sm text-gray-700 leading-relaxed penny-bubble-enter ${
+              bubbleVisible ? "opacity-100" : "opacity-0"
             }`}
             role="status"
             aria-live="polite"
           >
             <p className="font-semibold text-blue-700 text-xs mb-1">Penny</p>
-            {bubbleText}
+            {isLoading ? <ThinkingBubble /> : bubbleText}
           </div>
         )}
-        <div className="pointer-events-auto">
-          <PennyCharacter animation={animation} />
+
+        {!hasSpeech && (
+          <p className="text-xs text-gray-400 text-center animate-pulse pointer-events-none">
+            Click me!
+          </p>
+        )}
+
+        <div className="relative pointer-events-auto">
+          {!hasSpeech && (
+            <div className="absolute inset-0 rounded-full animate-ping bg-blue-200 opacity-30 scale-110 pointer-events-none" />
+          )}
+          <div
+            onClick={handlePennyClick}
+            className="relative cursor-pointer"
+            title="Click me for help!"
+            role="button"
+            aria-label="Penny, your spending guide — click for help"
+          >
+            <PennyCharacter animation={animation} />
+          </div>
         </div>
       </div>
     </PennyContext.Provider>

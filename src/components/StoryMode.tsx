@@ -171,7 +171,10 @@ export default function StoryMode({
   // ─── Render ───────────────────────────────────────────────────────────────
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-6">
+    <div
+      className="bg-white rounded-2xl border border-gray-200 p-6"
+      onClick={(e) => e.stopPropagation()}
+    >
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="text-base font-semibold text-gray-800 flex items-center gap-2">

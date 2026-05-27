@@ -141,7 +141,10 @@ export default function GovernanceLog({ logs }: { logs: GovernanceLog[] }) {
   const errorCount = logs.filter((l) => l.type === "error").length;
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-6">
+    <div
+      className="bg-white rounded-2xl border border-gray-200 p-6"
+      onClick={(e) => e.stopPropagation()}
+    >
       {/* Header */}
       <div
         className="flex items-center justify-between cursor-pointer"

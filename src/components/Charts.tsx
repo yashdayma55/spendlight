@@ -104,6 +104,27 @@ function CustomTooltip({
   return null;
 }
 
+function MonthTooltip({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: { value: number }[];
+  label?: string;
+}) {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-md">
+        <p className="text-sm font-medium text-gray-800">{label}</p>
+        <p className="text-sm text-blue-600 font-bold">{fmt(payload[0].value)}</p>
+        <p className="text-xs text-blue-500 mt-1 italic">Click to learn more</p>
+      </div>
+    );
+  }
+  return null;
+}
+
 function ClickHint() {
   return (
     <p className="text-xs text-blue-500 mt-2 italic">
@@ -227,14 +248,42 @@ function CategoryChart({
 }
 
 function MonthlyChart({
-  onPointClick,
+  onPennyExplain,
 }: {
-  onPointClick: (month: string, value: number) => void;
+  onPennyExplain: (context: string) => void;
 }) {
   const data = Object.entries(MONTHLY_SPEND).map(([month, value]) => ({
     month,
     value,
   }));
+
+  const monthlyAverage =
+    Object.values(MONTHLY_SPEND).reduce((a, b) => a + b, 0) / 12;
+
+  const buildMonthContext = (month: string, amount: number) => {
+    const amountFormatted = `$${(amount / 1e9).toFixed(1)}B`;
+    const avg = monthlyAverage;
+    const aboveBelow = amount > avg ? "above" : "below";
+
+    return `The user clicked on ${month} in the monthly spending chart. 
+    ${month} had spending of ${amountFormatted}. 
+    The monthly average is $${(avg / 1e9).toFixed(1)}B so this month is ${aboveBelow} average.
+    Fiscal year starts in July. Peaks happen in July, September and December 
+    when annual grants and contracts are issued.
+    Explain this month's spending in 2 plain English sentences.`;
+  };
+
+  const handleMonthClick = (chartState: unknown) => {
+    const state = chartState as {
+      activeLabel?: string;
+      activePayload?: { value: number }[];
+    };
+    if (state?.activePayload?.[0] && state.activeLabel) {
+      const month = state.activeLabel;
+      const amount = state.activePayload[0].value;
+      onPennyExplain(buildMonthContext(month, amount));
+    }
+  };
 
   return (
     <div>
@@ -243,34 +292,27 @@ function MonthlyChart({
         the fiscal year when annual grants and contracts are issued.
       </p>
       <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={data} margin={{ left: 10, right: 20 }}>
+        <LineChart
+          data={data}
+          margin={{ left: 10, right: 20 }}
+          onClick={handleMonthClick}
+        >
           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
           <XAxis dataKey="month" tick={{ fontSize: 12 }} />
           <YAxis tickFormatter={fmt} tick={{ fontSize: 11 }} />
-          <Tooltip content={<CustomTooltip />} />
+          <Tooltip content={<MonthTooltip />} />
           <Line
             type="monotone"
             dataKey="value"
             stroke="#1d4ed8"
             strokeWidth={2.5}
-            dot={(props) => {
-              const { cx, cy, payload } = props as {
-                cx: number;
-                cy: number;
-                payload: { month: string; value: number };
-              };
-              return (
-                <circle
-                  cx={cx}
-                  cy={cy}
-                  r={6}
-                  fill="#1d4ed8"
-                  className="cursor-pointer hover:opacity-70"
-                  onClick={() => onPointClick(payload.month, payload.value)}
-                />
-              );
+            dot={{
+              fill: "#1d4ed8",
+              r: 6,
+              cursor: "pointer",
+              strokeWidth: 2,
             }}
-            activeDot={{ r: 8 }}
+            activeDot={{ r: 9, cursor: "pointer" }}
           />
         </LineChart>
       </ResponsiveContainer>
@@ -347,12 +389,6 @@ export default function Charts() {
     );
   };
 
-  const explainMonth = (month: string, value: number) => {
-    penny.explain(
-      `The user clicked ${month} on the monthly spending chart (${fmt(value)} in FY2022). Explain what might drive spending that month, in 2 plain English sentences.`
-    );
-  };
-
   const explainVendor = (name: string, value: number) => {
     penny.explain(
       `The user clicked vendor "${name}" who received ${fmt(value)} (${pctOfTotal(value)}% of state spending). Explain who they are and why the state pays them, in 2 plain English sentences.`
@@ -367,7 +403,10 @@ export default function Charts() {
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-6">
+    <div
+      className="bg-white rounded-2xl border border-gray-200 p-6"
+      onClick={(e) => e.stopPropagation()}
+    >
       <div className="flex flex-wrap gap-2 mb-2">
         {tabs.map((tab) => (
           <TabButton
@@ -384,7 +423,9 @@ export default function Charts() {
       {activeTab === "categories" && (
         <CategoryChart onSliceClick={explainCategory} />
       )}
-      {activeTab === "monthly" && <MonthlyChart onPointClick={explainMonth} />}
+      {activeTab === "monthly" && (
+        <MonthlyChart onPennyExplain={(ctx) => penny.explain(ctx)} />
+      )}
       {activeTab === "vendors" && <VendorChart onBarClick={explainVendor} />}
     </div>
   );
