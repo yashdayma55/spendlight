@@ -233,42 +233,69 @@ function HomeContent({
             </div>
           </div>
 
-          {/* Footer */}
-          <div className="text-center mt-8 pt-6 border-t border-gray-100 dismiss-penny">
-            <p className="text-xs text-gray-400 mb-2">
-              Built with Next.js · RAG · Claude API · Washington State Open Data
-            </p>
-            <div className="flex items-center justify-center gap-4 flex-wrap">
-              <a
-                href="https://github.com/yashdayma55"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-gray-400 hover:text-gray-700 transition-all flex items-center gap-1"
-              >
-                🐙 GitHub
-              </a>
-              <span className="text-gray-200">·</span>
-              <a
-                href="https://www.linkedin.com/in/yashdayma/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-gray-400 hover:text-blue-600 transition-all flex items-center gap-1"
-              >
-                💼 LinkedIn
-              </a>
-              <span className="text-gray-200">·</span>
-              <a
-                href="mailto:yashdayma55@gmail.com"
-                className="text-xs text-gray-400 hover:text-gray-700 transition-all flex items-center gap-1"
-              >
-                ✉️ yashdayma55@gmail.com
-              </a>
-              <span className="text-gray-200">·</span>
-              <span className="text-xs text-gray-400 font-medium">
-                Built by Yash Dayma
-              </span>
+          <footer className="mt-12 bg-gray-900 rounded-2xl p-8 dismiss-penny">
+            <div className="flex flex-col items-center gap-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center text-white font-bold text-lg">
+                  S
+                </div>
+                <div>
+                  <p className="text-white font-bold text-lg leading-none">
+                    Spendlight
+                  </p>
+                  <p className="text-gray-400 text-xs mt-0.5">
+                    Making public spending understandable
+                  </p>
+                </div>
+              </div>
+
+              <div className="w-full border-t border-gray-700" />
+
+              <div className="flex flex-wrap items-center justify-center gap-6">
+                <a
+                  href="https://github.com/yashdayma55"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-gray-400 hover:text-white transition-all text-sm"
+                >
+                  <span className="text-lg">🐙</span>
+                  <span>github.com/yashdayma55</span>
+                </a>
+                <a
+                  href="https://www.linkedin.com/in/yashdayma/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-gray-400 hover:text-blue-400 transition-all text-sm"
+                >
+                  <span className="text-lg">💼</span>
+                  <span>linkedin.com/in/yashdayma</span>
+                </a>
+                <a
+                  href="mailto:yashdayma55@gmail.com"
+                  className="flex items-center gap-2 text-gray-400 hover:text-white transition-all text-sm"
+                >
+                  <span className="text-lg">✉️</span>
+                  <span>yashdayma55@gmail.com</span>
+                </a>
+              </div>
+
+              <div className="w-full border-t border-gray-700" />
+
+              <div className="flex flex-wrap items-center justify-center gap-2 text-xs text-gray-500">
+                <span>Built by Yash Dayma</span>
+                <span>·</span>
+                <span>Next.js</span>
+                <span>·</span>
+                <span>TypeScript</span>
+                <span>·</span>
+                <span>RAG</span>
+                <span>·</span>
+                <span>Claude API</span>
+                <span>·</span>
+                <span>Washington State Open Data</span>
+              </div>
             </div>
-          </div>
+          </footer>
         </div>
       </main>
     </>
