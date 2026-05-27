@@ -88,6 +88,10 @@ export default function ChatBox({ onNewLog }: { onNewLog: (log: GovernanceLog) =
         data.logs.forEach((log: GovernanceLog) => onNewLog(log));
       }
 
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
       const reply = data.reply || "Sorry, I could not generate a response.";
       const assistantMessage: Message = {
         role: "assistant",

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { CLAUDE_MODEL } from "@/lib/claude";
 import { usePenny } from "./PennyContext";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -113,7 +114,7 @@ export default function StoryMode({
     onNewLog({
       timestamp: new Date().toISOString(),
       type: "request",
-      model: "claude-sonnet-4-20250514",
+      model: CLAUDE_MODEL,
       user_message: "STORY_MODE: generate top insights",
       chunks_used: ["all"],
       context_length: STORY_PROMPT.length,
@@ -124,7 +125,8 @@ export default function StoryMode({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          question: STORY_PROMPT,
+          question:
+            "Generate top 3 newsworthy insights from Washington State spending data as JSON",
           messages: [{ role: "user", content: STORY_PROMPT }],
           storyMode: true,
         }),
@@ -132,7 +134,10 @@ export default function StoryMode({
 
       const data = await response.json();
 
-      // Log the response
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
       if (data.logs) {
         data.logs.forEach((log: GovernanceLog) => onNewLog(log));
       }
@@ -152,7 +157,7 @@ export default function StoryMode({
       onNewLog({
         timestamp: new Date().toISOString(),
         type: "error",
-        model: "claude-sonnet-4-20250514",
+        model: CLAUDE_MODEL,
         user_message: "STORY_MODE: generate top insights",
         chunks_used: [],
         context_length: 0,

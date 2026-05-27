@@ -3,9 +3,8 @@
 // Every AI call is logged here (governance requirement)
 
 import { NextRequest, NextResponse } from "next/server";
+import { CLAUDE_MODEL } from "@/lib/claude";
 import { buildContext } from "@/lib/rag";
-
-// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface Message {
   role: "user" | "assistant";
@@ -25,10 +24,6 @@ interface GovernanceLog {
   stop_reason?: string;
   error?: string;
 }
-
-// ─── System Prompt ────────────────────────────────────────────────────────────
-// This tells Claude who it is and how to behave
-// It receives relevant data chunks as context at runtime
 
 function buildSystemPrompt(context: string, pennyMode?: boolean): string {
   if (pennyMode) {
@@ -60,70 +55,86 @@ Rules:
 6. End with a short follow-up suggestion when relevant`;
 }
 
-// ─── POST Handler ─────────────────────────────────────────────────────────────
-
 export async function POST(request: NextRequest) {
   const logs: GovernanceLog[] = [];
+  let question = "unknown";
+
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+
+  if (!apiKey) {
+    return NextResponse.json(
+      { error: "ANTHROPIC_API_KEY is not set", logs: [] },
+      { status: 500 }
+    );
+  }
 
   try {
     const body = await request.json();
-    const { messages, question, pennyMode, storyMode } = body as {
+    const {
+      messages,
+      question: userQuestion,
+      pennyMode,
+      storyMode,
+    } = body as {
       messages: Message[];
       question: string;
       pennyMode?: boolean;
       storyMode?: boolean;
     };
 
-    // Step 1 — Run RAG to find relevant chunks
-    const { context, chunksUsed } = storyMode
-      ? { context: question, chunksUsed: ["all"] }
-      : buildContext(question);
+    question = userQuestion;
 
-    // Step 2 — Build governance log entry for this request
+    const { context, chunksUsed } = storyMode
+      ? { context: userQuestion, chunksUsed: ["all"] }
+      : buildContext(userQuestion);
+
     const requestLog: GovernanceLog = {
       timestamp: new Date().toISOString(),
       type: "request",
-      model: "claude-sonnet-4-20250514",
-      user_message: question,
+      model: CLAUDE_MODEL,
+      user_message: userQuestion,
       chunks_used: chunksUsed,
       context_length: context.length,
     };
     logs.push(requestLog);
 
-    // Step 3 — Call Claude API
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
+    const systemPrompt = storyMode
+      ? "You are a data journalist. Follow the user instructions exactly. Respond only with valid JSON — no markdown, no extra text."
+      : buildSystemPrompt(context, pennyMode);
+
+    const claudeResponse = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": process.env.ANTHROPIC_API_KEY!,
+        "x-api-key": apiKey,
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
+        model: CLAUDE_MODEL,
         max_tokens: pennyMode ? 256 : 1024,
-        system: storyMode
-          ? "You are a data journalist. Follow the user instructions exactly. Respond only with valid JSON — no markdown, no extra text."
-          : buildSystemPrompt(context, pennyMode),
-        messages: messages.map((m) => ({
+        system: systemPrompt,
+        messages: messages.map((m: Message) => ({
           role: m.role,
           content: m.content,
         })),
       }),
     });
 
-    if (!response.ok) {
-      throw new Error(`Claude API error: ${response.status}`);
+    if (!claudeResponse.ok) {
+      const errorBody = await claudeResponse.text();
+      throw new Error(
+        `Claude API returned ${claudeResponse.status}: ${errorBody}`
+      );
     }
 
-    const data = await response.json();
+    const data = await claudeResponse.json();
     const reply = data.content?.[0]?.text || "Unable to generate a response.";
 
-    // Step 4 — Log the response (governance requirement)
     const responseLog: GovernanceLog = {
       timestamp: new Date().toISOString(),
       type: "response",
-      model: "claude-sonnet-4-20250514",
-      user_message: question,
+      model: CLAUDE_MODEL,
+      user_message: userQuestion,
       chunks_used: chunksUsed,
       context_length: context.length,
       response_length: reply.length,
@@ -133,28 +144,28 @@ export async function POST(request: NextRequest) {
     };
     logs.push(responseLog);
 
-    // Step 5 — Return answer + logs to frontend
     return NextResponse.json({
       reply,
       logs,
       chunksUsed,
     });
-
   } catch (error) {
+    console.error("FULL ERROR:", error);
+
+    const errorMessage =
+      error instanceof Error ? error.message : JSON.stringify(error);
+
     const errorLog: GovernanceLog = {
       timestamp: new Date().toISOString(),
       type: "error",
-      model: "claude-sonnet-4-20250514",
-      user_message: "unknown",
+      model: CLAUDE_MODEL,
+      user_message: question,
       chunks_used: [],
       context_length: 0,
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: errorMessage,
     };
     logs.push(errorLog);
 
-    return NextResponse.json(
-      { error: "Something went wrong", logs },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: errorMessage, logs }, { status: 500 });
   }
 }

@@ -9,6 +9,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { CLAUDE_MODEL } from "@/lib/claude";
 import { PennyCharacter, type PennyAnimation } from "./Penny";
 import type { GovernanceLog } from "./GovernanceLog";
 
@@ -96,26 +97,37 @@ export function PennyProvider({
           }),
         });
 
+        if (!response.ok) {
+          throw new Error(`API call failed: ${response.status}`);
+        }
+
         const data = await response.json();
 
         if (data.logs) {
           data.logs.forEach((log: GovernanceLog) => onNewLog(log));
         }
 
-        const reply =
-          data.reply ||
-          "I had trouble explaining that — try clicking something else!";
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        const reply = data.reply;
+        if (!reply) {
+          throw new Error("No reply from API");
+        }
+
         speak(reply);
-      } catch {
-        speak("Sorry, I could not reach the assistant right now.");
+      } catch (error) {
+        console.error("Penny API error:", error);
+        speak("Hmm, let me think about that one a bit more...");
         onNewLog({
           timestamp: new Date().toISOString(),
           type: "error",
-          model: "claude-sonnet-4-20250514",
+          model: CLAUDE_MODEL,
           user_message: `PENNY: ${context}`,
           chunks_used: [],
           context_length: 0,
-          error: "Penny explain request failed",
+          error: error instanceof Error ? error.message : "Penny explain request failed",
         });
       }
     },
