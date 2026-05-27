@@ -234,9 +234,41 @@ function HomeContent({
           </div>
 
           {/* Footer */}
-          <p className="text-center text-xs text-gray-300 mt-8 dismiss-penny">
-            Built with Next.js · RAG · Claude API · Washington State Open Data
-          </p>
+          <div className="text-center mt-8 pt-6 border-t border-gray-100 dismiss-penny">
+            <p className="text-xs text-gray-400 mb-2">
+              Built with Next.js · RAG · Claude API · Washington State Open Data
+            </p>
+            <div className="flex items-center justify-center gap-4 flex-wrap">
+              <a
+                href="https://github.com/yashdayma55"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-gray-400 hover:text-gray-700 transition-all flex items-center gap-1"
+              >
+                🐙 GitHub
+              </a>
+              <span className="text-gray-200">·</span>
+              <a
+                href="https://www.linkedin.com/in/yashdayma/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-gray-400 hover:text-blue-600 transition-all flex items-center gap-1"
+              >
+                💼 LinkedIn
+              </a>
+              <span className="text-gray-200">·</span>
+              <a
+                href="mailto:yashdayma55@gmail.com"
+                className="text-xs text-gray-400 hover:text-gray-700 transition-all flex items-center gap-1"
+              >
+                ✉️ yashdayma55@gmail.com
+              </a>
+              <span className="text-gray-200">·</span>
+              <span className="text-xs text-gray-400 font-medium">
+                Built by Yash Dayma
+              </span>
+            </div>
+          </div>
         </div>
       </main>
     </>
