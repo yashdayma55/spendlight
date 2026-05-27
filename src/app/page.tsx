@@ -173,6 +173,7 @@ function HomeContent({
             </p>
           </div>
 
+          {/* 2. Key numbers */}
           <div className="mb-6" onClick={(e) => e.stopPropagation()}>
             <h2 className="text-lg font-bold text-gray-800 mb-1">
               The big picture
@@ -189,27 +190,27 @@ function HomeContent({
             </div>
           </div>
 
-          {/* 2. Persona selector */}
-          <div onClick={(e) => e.stopPropagation()}>
-            <PersonaSelector onSelect={onPersonaSelect} />
-          </div>
-
-          {/* 3. Story Mode */}
+          {/* 3. Story Mode — Step 1 */}
           <div className="mb-6" onClick={(e) => e.stopPropagation()}>
             <StoryMode onNewLog={addLog} />
           </div>
 
-          {/* 4. How this works */}
+          {/* 4. How to use — Step 2 */}
           <div onClick={(e) => e.stopPropagation()}>
             <HowToUse />
           </div>
 
-          {/* 5. Charts */}
+          {/* 5. Persona selector */}
+          <div onClick={(e) => e.stopPropagation()}>
+            <PersonaSelector onSelect={onPersonaSelect} />
+          </div>
+
+          {/* 6. Charts — Step 3 */}
           <div className="mb-6" onClick={(e) => e.stopPropagation()}>
             <Charts />
           </div>
 
-          {/* 6. Chat */}
+          {/* 7. Chat — Step 4 */}
           <div className="mb-6" onClick={(e) => e.stopPropagation()}>
             <ChatBox
               onNewLog={addLog}
