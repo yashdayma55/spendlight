@@ -1,5 +1,16 @@
 "use client";
 
+/** Clean AI response text — remove dashes and bullet formatting for speech bubbles. */
+export function cleanPennyText(text: string): string {
+  return text
+    .replace(/^[-•*]\s+/gm, "")
+    .replace(/\n[-•*]\s+/g, " ")
+    .replace(/\n{2,}/g, " ")
+    .replace(/\*\*(.*?)\*\*/g, "$1")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export type PennyAnimation = "idle" | "thinking" | "talking";
 
 interface PennyCharacterProps {

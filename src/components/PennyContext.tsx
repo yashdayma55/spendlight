@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import { CLAUDE_MODEL } from "@/lib/claude";
-import { PennyCharacter, type PennyAnimation } from "./Penny";
+import { cleanPennyText, PennyCharacter, type PennyAnimation } from "./Penny";
 import type { GovernanceLog } from "./GovernanceLog";
 
 export const PENNY_INTRO =
@@ -79,15 +79,12 @@ export function PennyProvider({
     setBubbleText(text);
   }, []);
 
-  const speak = useCallback(
-    (text: string) => {
-      setAnimation("talking");
-      setIsLoading(false);
-      setBubbleText(text);
-      setBubbleVisible(true);
-    },
-    []
-  );
+  const speak = useCallback((text: string) => {
+    setAnimation("talking");
+    setIsLoading(false);
+    setBubbleText(cleanPennyText(text));
+    setBubbleVisible(true);
+  }, []);
 
   const showIntroduction = useCallback(() => {
     speak(PENNY_INTRO);
