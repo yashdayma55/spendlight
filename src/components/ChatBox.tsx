@@ -48,7 +48,14 @@ function ChunkBadge({ chunk }: { chunk: string }) {
   );
 }
 
-export default function ChatBox({ onNewLog }: { onNewLog: (log: GovernanceLog) => void }) {
+export default function ChatBox({
+  onNewLog,
+  starterQuestions: starterQuestionsProp,
+}: {
+  onNewLog: (log: GovernanceLog) => void;
+  starterQuestions?: readonly string[];
+}) {
+  const starterQuestions = starterQuestionsProp ?? STARTER_QUESTIONS;
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -117,11 +124,18 @@ export default function ChatBox({ onNewLog }: { onNewLog: (log: GovernanceLog) =
       className="bg-white rounded-2xl border border-gray-200 p-6"
       onClick={(e) => e.stopPropagation()}
     >
-      <div className="flex items-center gap-2 mb-4">
-        <span className="text-lg">✦</span>
-        <h2 className="text-base font-semibold text-gray-800">
-          Ask a question about this data
-        </h2>
+      <div className="mb-4">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-lg">💬</span>
+          <h2 className="text-base font-semibold text-gray-800">
+            Ask anything about this data
+          </h2>
+        </div>
+        <p className="text-sm text-gray-500">
+          Type your question in plain English below. No data skills needed. For
+          example: &quot;Why does healthcare get so much money?&quot; or
+          &quot;Which companies are paid the most?&quot;
+        </p>
       </div>
 
       {messages.length === 0 && (

@@ -113,7 +113,10 @@ function HomeContent({
 
           {/* 6. Chat */}
           <div className="mb-6" onClick={(e) => e.stopPropagation()}>
-            <ChatBox onNewLog={addLog} />
+            <ChatBox
+              onNewLog={addLog}
+              starterQuestions={selectedPersona?.starterQuestions}
+            />
           </div>
 
           {/* 7. Governance Log */}
