@@ -24,6 +24,8 @@ import {
 } from "@/lib/data";
 import { usePenny } from "./PennyContext";
 
+const TOTAL_BUDGET = FISCAL_METADATA.total_spend;
+
 const fmt = (n: number) => {
   if (n >= 1e9) return `$${(n / 1e9).toFixed(1)}B`;
   if (n >= 1e6) return `$${(n / 1e6).toFixed(0)}M`;
@@ -84,20 +86,41 @@ function TabButton({
   );
 }
 
+function formatTooltipBillions(value: number): string {
+  return `$${(value / 1e9).toFixed(1)}B`;
+}
+
 function CustomTooltip({
   active,
   payload,
   label,
+  totalBudget,
 }: {
   active?: boolean;
   payload?: { value: number }[];
   label?: string;
+  totalBudget?: number;
 }) {
   if (active && payload && payload.length) {
+    const value = payload[0].value;
+    const pct = totalBudget
+      ? ((value / totalBudget) * 100).toFixed(1)
+      : null;
+
     return (
-      <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-md">
-        <p className="text-sm font-medium text-gray-800">{label}</p>
-        <p className="text-sm text-blue-600 font-bold">{fmt(payload[0].value)}</p>
+      <div className="bg-white border border-gray-200 rounded-xl p-3 shadow-lg max-w-48">
+        <p className="text-sm font-semibold text-gray-800 mb-1">{label}</p>
+        <p className="text-lg font-bold text-blue-600">
+          {formatTooltipBillions(value)}
+        </p>
+        {pct && (
+          <p className="text-xs text-gray-500 mt-1">
+            {pct}% of total state budget
+          </p>
+        )}
+        <p className="text-xs text-blue-500 mt-2 font-medium">
+          Click to get Penny&apos;s explanation →
+        </p>
       </div>
     );
   }
@@ -108,17 +131,33 @@ function MonthTooltip({
   active,
   payload,
   label,
+  totalBudget,
 }: {
   active?: boolean;
   payload?: { value: number }[];
   label?: string;
+  totalBudget?: number;
 }) {
   if (active && payload && payload.length) {
+    const value = payload[0].value;
+    const pct = totalBudget
+      ? ((value / totalBudget) * 100).toFixed(1)
+      : null;
+
     return (
-      <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-md">
-        <p className="text-sm font-medium text-gray-800">{label}</p>
-        <p className="text-sm text-blue-600 font-bold">{fmt(payload[0].value)}</p>
-        <p className="text-xs text-blue-500 mt-1 italic">Click to learn more</p>
+      <div className="bg-white border border-gray-200 rounded-xl p-3 shadow-lg max-w-48">
+        <p className="text-sm font-semibold text-gray-800 mb-1">{label}</p>
+        <p className="text-lg font-bold text-blue-600">
+          {formatTooltipBillions(value)}
+        </p>
+        {pct && (
+          <p className="text-xs text-gray-500 mt-1">
+            {pct}% of total state budget
+          </p>
+        )}
+        <p className="text-xs text-blue-500 mt-2 font-medium">
+          Click to learn more →
+        </p>
       </div>
     );
   }
@@ -156,7 +195,9 @@ function AgencyChart({ onBarClick }: { onBarClick: (name: string, value: number)
         <BarChart data={data} layout="vertical" margin={{ left: 20, right: 40 }}>
           <XAxis type="number" tickFormatter={fmt} tick={{ fontSize: 11 }} />
           <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={160} />
-          <Tooltip content={<CustomTooltip />} />
+          <Tooltip
+            content={<CustomTooltip totalBudget={TOTAL_BUDGET} />}
+          />
           <Bar
             dataKey="value"
             fill="#1d4ed8"
@@ -222,7 +263,9 @@ function CategoryChart({
                 />
               ))}
             </Pie>
-            <Tooltip formatter={(value) => fmt(Number(value))} />
+            <Tooltip
+              content={<CustomTooltip totalBudget={TOTAL_BUDGET} />}
+            />
           </PieChart>
         </ResponsiveContainer>
         <div className="flex flex-col gap-2 min-w-[200px]">
@@ -311,7 +354,9 @@ function MonthlyChart({
           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
           <XAxis dataKey="month" tick={{ fontSize: 12 }} />
           <YAxis tickFormatter={fmt} tick={{ fontSize: 11 }} />
-          <Tooltip content={<MonthTooltip />} />
+          <Tooltip
+            content={<MonthTooltip totalBudget={TOTAL_BUDGET} />}
+          />
           <Line
             type="monotone"
             dataKey="value"
@@ -357,7 +402,9 @@ function VendorChart({ onBarClick }: { onBarClick: (name: string, value: number)
         <BarChart data={data} layout="vertical" margin={{ left: 20, right: 40 }}>
           <XAxis type="number" tickFormatter={fmt} tick={{ fontSize: 11 }} />
           <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={170} />
-          <Tooltip content={<CustomTooltip />} />
+          <Tooltip
+            content={<CustomTooltip totalBudget={TOTAL_BUDGET} />}
+          />
           <Bar
             dataKey="value"
             fill="#0f766e"
