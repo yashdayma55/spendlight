@@ -1,0 +1,159 @@
+{
+  "FISCAL_METADATA": {
+    "fiscal_year": 2022,
+    "biennium": "2021-23",
+    "total_spend": 29535369459.6084,
+    "total_transactions": 451029,
+    "num_agencies": 99,
+    "num_vendors": 65494
+  },
+  "AGENCY_TOTALS": {
+    "Health Care Authority": 13124865770.95994,
+    "Social and Health Services": 6023569856.760113,
+    "Transportation": 1752935701.7000132,
+    "Health": 1447472094.339991,
+    "Commerce": 1415870737.1899989,
+    "Children, Youth, and Families": 1342719953.9700208,
+    "Public Schools": 912194950.6999997,
+    "Ecology": 434597312.239999,
+    "Military Department": 403235659.76000017,
+    "Corrections": 400320077.81999874,
+    "Natural Resources": 208864052.47999954,
+    "Recreation and Conservation Office": 166325166.44999993,
+    "Enterprise Services": 164151709.25000036,
+    "Labor and Industries": 163998211.40000027,
+    "Fish and Wildlife": 143492737.97000048,
+    "Employment Security Department": 135134357.33999968,
+    "Consolidated Technology Services": 124543839.99000017,
+    "State Patrol": 112401943.25000018,
+    "Agriculture": 105424785.64999968,
+    "Transportation Improvement Board": 72071673.51999995
+  },
+  "CATEGORY_TOTALS": {
+    "Grants, Benefits & Client Services": 23309633530.59902,
+    "Goods and Services": 3698881381.980049,
+    "Travel": 59654627.29999984,
+    "Capital Outlays": 1570419145.350006,
+    "Personal Service Contracts": 836509512.1500021,
+    "Interagency Reimbursements": 14001400.08,
+    "Debt Service": 23124247.040000003,
+    "Cost Of Goods Sold": 12141307.16000001,
+    "Intra-Agency Reimbursements": 11004307.949999997
+  },
+  "MONTHLY_SPEND": {
+    "Jul": 3446473054.5999846,
+    "Aug": 1511666571.9300015,
+    "Sep": 3168150366.080017,
+    "Oct": 2327239782.4699917,
+    "Nov": 1589116217.6000018,
+    "Dec": 3155895567.729992,
+    "Jan": 2500740123.9700074,
+    "Feb": 2379785813.5400286,
+    "Mar": 2577922072.8300014,
+    "Apr": 2399425020.0400085,
+    "May": 2468839253.9000173,
+    "Jun": 2010115614.9200213
+  },
+  "TOP_VENDORS": {
+    "MOLINA HEALTHCARE OF WASHINGTON": 4553221152.25,
+    "PUBLIC PARTNERSHIPS LLC": 1426492739.86,
+    "UNITED HEALTH CARE OF WASHINGTON": 1321815571.48,
+    "AMERIGROUP WASHINGTON INC": 1305841343.26,
+    "COMMUNITY HEALTH PLAN OF WASHING": 1158754005.5400002,
+    "COORDINATED CARE OF WASHINGTON I": 1041809891.72,
+    "CONSUMER DIRECT CARE NETWORK WAS": 477590639.53,
+    "KING CO HOUSING & COMM DEV": 265021879.31,
+    "DOH GRANTS": 230107654.94000003,
+    "US BANK PURCHASING CARD PROGRAM": 211335537.19999883,
+    "PUBLIC CONSULTING GROUP INC": 202574455.5,
+    "CLARK CONSTRUCTION LLC": 200423886.42,
+    "MOLINA HEALTHCARE OF WA INC": 174189905.79999998,
+    "KING CO PUBLIC HEALTH": 170757256.32999995,
+    "RES-CARE OF WASHINGTON INC.": 156602420.07
+  },
+  "AGENCY_BY_CATEGORY": {
+    "Health Care Authority": {
+      "Grants, Benefits & Client Services": 12630624323.22997,
+      "Personal Service Contracts": 37280357.86999999,
+      "Goods and Services": 453969217.2600008,
+      "Travel": 191577.16000000006,
+      "Capital Outlays": 2706545.44,
+      "Interagency Reimbursements": 93750
+    },
+    "Social and Health Services": {
+      "Grants, Benefits & Client Services": 5371342109.980054,
+      "Goods and Services": 433521134.64000005,
+      "Travel": 5186973.839999984,
+      "Personal Service Contracts": 105044163.20000002,
+      "Capital Outlays": 97460800.88,
+      "Intra-Agency Reimbursements": 10966003.249999998,
+      "Interagency Reimbursements": 48670.97
+    },
+    "Transportation": {
+      "Goods and Services": 371354788.5000001,
+      "Travel": 3625378.9900000077,
+      "Capital Outlays": 1198632451.7599995,
+      "Grants, Benefits & Client Services": 153048184.31,
+      "Personal Service Contracts": 26242314.230000008,
+      "Debt Service": 1334.77,
+      "Intra-Agency Reimbursements": 31249.14
+    },
+    "Health": {
+      "Personal Service Contracts": 215968997.83999994,
+      "Travel": 2020448.3900000034,
+      "Capital Outlays": 9732059.700000001,
+      "Grants, Benefits & Client Services": 566410669.2999997,
+      "Goods and Services": 639762333.1500013,
+      "Interagency Reimbursements": 13570530.4,
+      "Intra-Agency Reimbursements": 7055.56
+    },
+    "Commerce": {
+      "Grants, Benefits & Client Services": 1367437330.4299972,
+      "Personal Service Contracts": 25084491.279999986,
+      "Goods and Services": 20735001.680000007,
+      "Travel": 468184.4200000004,
+      "Capital Outlays": 2095758.3800000004,
+      "Interagency Reimbursements": 49971
+    },
+    "Children, Youth, and Families": {
+      "Goods and Services": 273508324.6999983,
+      "Travel": 5416659.679999992,
+      "Grants, Benefits & Client Services": 974056587.8599917,
+      "Personal Service Contracts": 78626690.71000004,
+      "Capital Outlays": 10867545.599999996,
+      "Debt Service": 232497.15,
+      "Interagency Reimbursements": 11648.27
+    },
+    "Public Schools": {
+      "Personal Service Contracts": 54916437.379999965,
+      "Goods and Services": 42836995.31999993,
+      "Travel": 260947.18,
+      "Capital Outlays": 563359.81,
+      "Grants, Benefits & Client Services": 813612593.4900002,
+      "Interagency Reimbursements": 4617.52
+    },
+    "Ecology": {
+      "Personal Service Contracts": 68857425.47999997,
+      "Goods and Services": 43304502.02999992,
+      "Travel": 3446494.510000003,
+      "Capital Outlays": 7145139.570000001,
+      "Grants, Benefits & Client Services": 311843750.6500004
+    },
+    "Military Department": {
+      "Personal Service Contracts": 1589601.0700000003,
+      "Goods and Services": 22192363.950000007,
+      "Travel": 730590.0499999993,
+      "Capital Outlays": 18518165.839999992,
+      "Grants, Benefits & Client Services": 360204938.8500004
+    },
+    "Corrections": {
+      "Personal Service Contracts": 2909780.8399999994,
+      "Goods and Services": 235046746.49000016,
+      "Cost Of Goods Sold": 4390882.640000004,
+      "Travel": 7550709.849999982,
+      "Capital Outlays": 45612364.15000006,
+      "Grants, Benefits & Client Services": 104640483.63,
+      "Debt Service": 169110.22000000003
+    }
+  }
+}

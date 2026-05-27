@@ -20,6 +20,11 @@
 # production
 /build
 
+# large source data (place CSV locally; run npm run generate-data)
+/public/data/*.csv
+/public/data/*.xlsx
+/public/data/VendorPayments2123.xlsx
+
 # misc
 .DS_Store
 *.pem
