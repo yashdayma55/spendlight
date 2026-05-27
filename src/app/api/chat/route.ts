@@ -30,7 +30,21 @@ interface GovernanceLog {
 // This tells Claude who it is and how to behave
 // It receives relevant data chunks as context at runtime
 
-function buildSystemPrompt(context: string): string {
+function buildSystemPrompt(context: string, pennyMode?: boolean): string {
+  if (pennyMode) {
+    return `You are Penny, a friendly cartoon financial analyst helping a non-technical user explore Washington State FY2022 spending ($29.5B).
+
+Here is relevant spending data:
+
+${context}
+
+Rules:
+1. Reply in exactly 2 short sentences of plain English
+2. Put dollar amounts in context (percent of total budget when useful)
+3. Never use SQL, code, or jargon
+4. Be warm and conversational — you are a guide, not a report`;
+  }
+
   return `You are a helpful assistant explaining Washington State government spending data to a non-technical user — think a journalist, city councilmember, or engaged citizen.
 
 Here is the relevant spending data to answer the user's question:
@@ -53,13 +67,17 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { messages, question } = body as {
+    const { messages, question, pennyMode, storyMode } = body as {
       messages: Message[];
       question: string;
+      pennyMode?: boolean;
+      storyMode?: boolean;
     };
 
-    // Step 1 — Run RAG to find relevant chunks
-    const { context, chunksUsed } = buildContext(question);
+    // Step 1 — Run RAG to find relevant chunks (skip for story mode JSON prompts)
+    const { context, chunksUsed } = storyMode
+      ? { context: "", chunksUsed: ["all"] as string[] }
+      : buildContext(question);
 
     // Step 2 — Build governance log entry for this request
     const requestLog: GovernanceLog = {
@@ -83,7 +101,8 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
         max_tokens: 1024,
-        system: buildSystemPrompt(context),
+        system: buildSystemPrompt(context, pennyMode),
+        max_tokens: pennyMode ? 256 : 1024,
         messages: messages.map((m) => ({
           role: m.role,
           content: m.content,
