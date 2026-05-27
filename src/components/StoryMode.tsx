@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { usePenny } from "./PennyContext";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -99,10 +100,14 @@ export default function StoryMode({
   const [loading, setLoading] = useState(false);
   const [generated, setGenerated] = useState(false);
   const [error, setError] = useState("");
+  const penny = usePenny();
 
   const generateStory = async () => {
     setLoading(true);
     setError("");
+    penny.explain(
+      "The user clicked Generate insights to find newsworthy stories in Washington State FY2022 spending data. Say you are looking for the most interesting stories in the data — exactly 1 short enthusiastic sentence."
+    );
 
     // Log the request (governance requirement)
     onNewLog({
