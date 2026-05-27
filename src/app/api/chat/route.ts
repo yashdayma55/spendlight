@@ -4,6 +4,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { CLAUDE_MODEL } from "@/lib/claude";
+import { FORMATTING_RULES } from "@/lib/aiFormatting";
 import { buildContext } from "@/lib/rag";
 
 interface Message {
@@ -33,11 +34,11 @@ Here is relevant spending data:
 
 ${context}
 
-Rules:
-1. Reply in exactly 2 short sentences of plain English
-2. Put dollar amounts in context (percent of total budget when useful)
-3. Never use SQL, code, or jargon
-4. Be warm and conversational — you are a guide, not a report`;
+${FORMATTING_RULES}
+
+Additional rules for Penny:
+- Reply in exactly 2 short sentences of plain English
+- You are a guide, not a report`;
   }
 
   return `You are a helpful assistant explaining Washington State government spending data to a non-technical user — think a journalist, city councilmember, or engaged citizen.
@@ -46,14 +47,20 @@ Here is the relevant spending data to answer the user's question:
 
 ${context}
 
-Rules:
-1. Keep answers short, clear and jargon-free — 2 to 4 sentences max
-2. Always put numbers in context — say "that is 44% of the total budget" not just "$13B"
-3. Never use SQL, code, or technical terms
-4. If the question is outside this data, say so honestly
-5. Be warm and curious — this is public money, people have a right to understand it
-6. End with a short follow-up suggestion when relevant`;
+${FORMATTING_RULES}
+
+Additional rules:
+- If the question is outside this data, say so honestly
+- This is public money; people have a right to understand it`;
 }
+
+const STORY_SYSTEM_PROMPT = `You are a data journalist analyzing Washington State FY2022 spending data.
+
+Follow the user instructions exactly. Respond only with valid JSON — no markdown fences, no extra text outside the JSON array.
+
+For headline and explanation fields inside the JSON:
+- NEVER use bullet points, dashes as list markers, or asterisks
+- Write headlines and explanations as plain conversational sentences only`;
 
 export async function POST(request: NextRequest) {
   const logs: GovernanceLog[] = [];
@@ -99,7 +106,7 @@ export async function POST(request: NextRequest) {
     logs.push(requestLog);
 
     const systemPrompt = storyMode
-      ? "You are a data journalist. Follow the user instructions exactly. Respond only with valid JSON — no markdown, no extra text."
+      ? STORY_SYSTEM_PROMPT
       : buildSystemPrompt(context, pennyMode);
 
     const claudeResponse = await fetch("https://api.anthropic.com/v1/messages", {
