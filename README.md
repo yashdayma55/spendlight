@@ -75,6 +75,30 @@ src/
 public/data/        # Place CSV here (gitignored)
 ```
 
+## Deploy on Vercel
+
+The repo includes `src/lib/spending-data.json`, so Vercel can build without the CSV file.
+
+### Option A — Vercel Dashboard (recommended)
+
+1. Go to [vercel.com/new](https://vercel.com/new) and sign in with GitHub.
+2. Import **`yashdayma55/spendlight`**.
+3. Framework preset: **Next.js** (auto-detected). Leave build command as `npm run build`.
+4. Under **Environment Variables**, add:
+   - `ANTHROPIC_API_KEY` = your Anthropic API key (same value as in `.env.local`)
+5. Click **Deploy**.
+
+After deploy, open your production URL and test `/api/test` — it should return `"status": "success"`.
+
+### Option B — Vercel CLI
+
+```bash
+npx vercel login
+npx vercel link
+npx vercel env add ANTHROPIC_API_KEY   # paste key when prompted
+npx vercel --prod
+```
+
 ## License
 
 MIT — data © Washington State Open Checkbook.
