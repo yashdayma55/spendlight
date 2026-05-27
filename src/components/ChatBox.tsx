@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-
-// ─── Types ────────────────────────────────────────────────────────────────────
+import { usePenny } from "./PennyContext";
 
 interface Message {
   role: "user" | "assistant";
@@ -24,10 +23,6 @@ interface GovernanceLog {
   error?: string;
 }
 
-// ─── Starter Questions ────────────────────────────────────────────────────────
-// These guide non-technical users on what to ask
-// They also serve as examples of good questions
-
 const STARTER_QUESTIONS = [
   "Which agency spent the most money?",
   "What was most of the money spent on?",
@@ -36,10 +31,6 @@ const STARTER_QUESTIONS = [
   "How much went to healthcare vs transportation?",
   "What share is grants vs goods and services?",
 ];
-
-// ─── Chunk Badge ──────────────────────────────────────────────────────────────
-// Shows which data chunks were used to answer the question
-// This is a transparency feature for the user
 
 function ChunkBadge({ chunk }: { chunk: string }) {
   const colors: Record<string, string> = {
@@ -50,49 +41,35 @@ function ChunkBadge({ chunk }: { chunk: string }) {
     vendors: "bg-teal-100 text-teal-700",
     agency_category: "bg-pink-100 text-pink-700",
   };
-
   return (
-    <span
-      className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-        colors[chunk] || "bg-gray-100 text-gray-600"
-      }`}
-    >
+    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${colors[chunk] || "bg-gray-100 text-gray-600"}`}>
       {chunk}
     </span>
   );
 }
 
-// ─── Main ChatBox Component ───────────────────────────────────────────────────
-
-export default function ChatBox({
-  onNewLog,
-}: {
-  onNewLog: (log: GovernanceLog) => void;
-}) {
+export default function ChatBox({ onNewLog }: { onNewLog: (log: GovernanceLog) => void }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const penny = usePenny();
 
-  // Auto scroll to bottom when new message arrives
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
-  // ─── Send Message ───────────────────────────────────────────────────────────
-
   const sendMessage = async (question: string) => {
     if (!question.trim() || loading) return;
 
-    // Add user message to chat
     const userMessage: Message = { role: "user", content: question };
     const updatedMessages = [...messages, userMessage];
     setMessages(updatedMessages);
     setInput("");
     setLoading(true);
+    penny.setThinking();
 
     try {
-      // Call our API route
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -107,32 +84,29 @@ export default function ChatBox({
 
       const data = await response.json();
 
-      // Send logs to governance log panel
       if (data.logs) {
         data.logs.forEach((log: GovernanceLog) => onNewLog(log));
       }
 
-      // Add assistant reply to chat
+      const reply = data.reply || "Sorry, I could not generate a response.";
       const assistantMessage: Message = {
         role: "assistant",
-        content: data.reply || "Sorry, I could not generate a response.",
+        content: reply,
         chunksUsed: data.chunksUsed || [],
       };
       setMessages([...updatedMessages, assistantMessage]);
-    } catch (error) {
+      penny.speak(reply);
+    } catch {
+      const errMsg = "Something went wrong. Please try again.";
       setMessages([
         ...updatedMessages,
-        {
-          role: "assistant",
-          content: "Something went wrong. Please try again.",
-        },
+        { role: "assistant", content: errMsg },
       ]);
+      penny.speak(errMsg);
     }
 
     setLoading(false);
   };
-
-  // ─── Render ─────────────────────────────────────────────────────────────────
 
   return (
     <div className="bg-white rounded-2xl border border-gray-200 p-6">
@@ -143,7 +117,6 @@ export default function ChatBox({
         </h2>
       </div>
 
-      {/* Starter questions — shown only before first message */}
       {messages.length === 0 && (
         <div className="flex flex-wrap gap-2 mb-4">
           {STARTER_QUESTIONS.map((q) => (
@@ -158,27 +131,17 @@ export default function ChatBox({
         </div>
       )}
 
-      {/* Message history */}
       <div className="max-h-80 overflow-y-auto mb-4 space-y-3">
         {messages.map((m, i) => (
-          <div
-            key={i}
-            className={`flex ${
-              m.role === "user" ? "justify-end" : "justify-start"
-            }`}
-          >
+          <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
             <div className="max-w-[80%]">
-              <div
-                className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
-                  m.role === "user"
-                    ? "bg-blue-600 text-white rounded-br-sm"
-                    : "bg-gray-100 text-gray-800 rounded-bl-sm"
-                }`}
-              >
+              <div className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
+                m.role === "user"
+                  ? "bg-blue-600 text-white rounded-br-sm"
+                  : "bg-gray-100 text-gray-800 rounded-bl-sm"
+              }`}>
                 {m.content}
               </div>
-
-              {/* Show which chunks were used for assistant messages */}
               {m.role === "assistant" && m.chunksUsed && m.chunksUsed.length > 0 && (
                 <div className="flex gap-1 mt-1 flex-wrap">
                   <span className="text-xs text-gray-400">Sources:</span>
@@ -191,7 +154,6 @@ export default function ChatBox({
           </div>
         ))}
 
-        {/* Loading indicator */}
         {loading && (
           <div className="flex justify-start">
             <div className="bg-gray-100 px-4 py-2.5 rounded-2xl rounded-bl-sm">
@@ -206,7 +168,6 @@ export default function ChatBox({
         <div ref={bottomRef} />
       </div>
 
-      {/* Input area */}
       <div className="flex gap-2">
         <input
           type="text"
@@ -225,3 +186,6 @@ export default function ChatBox({
           Ask ↗
         </button>
       </div>
+    </div>
+  );
+}
