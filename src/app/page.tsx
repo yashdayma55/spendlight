@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import WelcomeScreen from "@/components/WelcomeScreen";
 import Charts from "@/components/Charts";
 import ChatBox from "@/components/ChatBox";
 import StoryMode from "@/components/StoryMode";
@@ -10,6 +9,9 @@ import { GovernanceLog as GovernanceLogType } from "@/components/GovernanceLog";
 import { PennyProvider, usePenny } from "@/components/PennyContext";
 import PennyIntro from "@/components/PennyIntro";
 import AboutSection from "@/components/AboutSection";
+import PersonaSelector, { type Persona } from "@/components/PersonaSelector";
+import HowToUse from "@/components/HowToUse";
+import WelcomeScreen from "@/components/WelcomeScreen";
 import { FISCAL_METADATA } from "@/lib/data";
 
 const formatNumber = (n: number) =>
@@ -29,9 +31,13 @@ function StatCard({ label, value }: { label: string; value: string }) {
 function HomeContent({
   logs,
   addLog,
+  selectedPersona,
+  onPersonaSelect,
 }: {
   logs: GovernanceLogType[];
   addLog: (log: GovernanceLogType) => void;
+  selectedPersona: Persona | null;
+  onPersonaSelect: (persona: Persona) => void;
 }) {
   const penny = usePenny();
   const totalB = (FISCAL_METADATA.total_spend / 1e9).toFixed(1);
@@ -53,6 +59,7 @@ function HomeContent({
         }}
       >
         <div className="max-w-5xl mx-auto px-4 py-10">
+          {/* 1. Header */}
           <div className="mb-8 dismiss-penny">
             <p className="text-xs font-mono text-gray-400 uppercase tracking-widest mb-2">
               Washington State · Fiscal Year 2022 · Public Data
@@ -84,26 +91,42 @@ function HomeContent({
             <StatCard label="Biggest category" value="Grants & Benefits" />
           </div>
 
+          {/* 2. Persona selector */}
+          <div onClick={(e) => e.stopPropagation()}>
+            <PersonaSelector onSelect={onPersonaSelect} />
+          </div>
+
+          {/* 3. Story Mode */}
           <div className="mb-6" onClick={(e) => e.stopPropagation()}>
             <StoryMode onNewLog={addLog} />
           </div>
 
+          {/* 4. How this works */}
+          <div onClick={(e) => e.stopPropagation()}>
+            <HowToUse />
+          </div>
+
+          {/* 5. Charts */}
           <div className="mb-6" onClick={(e) => e.stopPropagation()}>
             <Charts />
           </div>
 
+          {/* 6. Chat */}
           <div className="mb-6" onClick={(e) => e.stopPropagation()}>
             <ChatBox onNewLog={addLog} />
           </div>
 
+          {/* 7. Governance Log */}
           <div className="mb-6" onClick={(e) => e.stopPropagation()}>
             <GovernanceLog logs={logs} />
           </div>
 
+          {/* 8. About */}
           <div onClick={(e) => e.stopPropagation()}>
             <AboutSection />
           </div>
 
+          {/* 9. Footer */}
           <p className="text-center text-xs text-gray-300 mt-8 dismiss-penny">
             Built with Next.js · RAG · Claude API · Washington State Open Data
           </p>
@@ -116,6 +139,7 @@ function HomeContent({
 export default function Home() {
   const [logs, setLogs] = useState<GovernanceLogType[]>([]);
   const [showWelcome, setShowWelcome] = useState(true);
+  const [selectedPersona, setSelectedPersona] = useState<Persona | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => setShowWelcome(false), 1800);
@@ -132,7 +156,12 @@ export default function Home() {
 
   return (
     <PennyProvider onNewLog={addLog}>
-      <HomeContent logs={logs} addLog={addLog} />
+      <HomeContent
+        logs={logs}
+        addLog={addLog}
+        selectedPersona={selectedPersona}
+        onPersonaSelect={setSelectedPersona}
+      />
     </PennyProvider>
   );
 }
