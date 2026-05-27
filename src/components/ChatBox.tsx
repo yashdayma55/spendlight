@@ -136,15 +136,17 @@ export default function ChatBox({
     >
       <div className="mb-4">
         <div className="flex items-center gap-2 mb-1">
-          <span className="text-lg">💬</span>
-          <h2 className="text-base font-semibold text-gray-800">
+          <div className="w-7 h-7 bg-gray-900 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">
+            4
+          </div>
+          <h2 className="text-base font-bold text-gray-800">
             Ask anything about this data
           </h2>
         </div>
-        <p className="text-sm text-gray-500">
-          Type your question in plain English below. No data skills needed. For
-          example: &quot;Why does healthcare get so much money?&quot; or
-          &quot;Which companies are paid the most?&quot;
+        <p className="text-sm text-gray-500 ml-9">
+          Type any question in plain English below. You do not need any data
+          skills. The AI will search the real spending data and answer in plain
+          English. Try one of the suggested questions below to get started.
         </p>
       </div>
 

@@ -176,18 +176,20 @@ export default function StoryMode({
       className="bg-white rounded-2xl border border-gray-200 p-6"
       onClick={(e) => e.stopPropagation()}
     >
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+      <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-4">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-xl">📰</span>
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-7 h-7 bg-gray-900 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">
+              1
+            </div>
             <h2 className="text-lg font-bold text-gray-900">
-              Start here — What&apos;s the biggest story?
+              Start here — get the story in seconds
             </h2>
           </div>
-          <p className="text-sm text-gray-500">
-            Not sure where to begin? Click the button and AI will instantly
-            find the 3 most surprising, newsworthy findings in this data. No
-            data skills needed.
+          <p className="text-sm text-gray-500 ml-9">
+            Not sure where to begin? Click the button and AI will instantly find
+            the 3 most surprising, newsworthy findings in this $29.5B dataset. No
+            data skills needed — just one click.
           </p>
         </div>
 

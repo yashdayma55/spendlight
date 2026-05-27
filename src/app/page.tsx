@@ -173,14 +173,20 @@ function HomeContent({
             </p>
           </div>
 
-          <div
-            className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <StatCard statKey="Total Spend" />
-            <StatCard statKey="Largest Agency" />
-            <StatCard statKey="Vendors Paid" />
-            <StatCard statKey="Biggest Category" />
+          <div className="mb-6" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-lg font-bold text-gray-800 mb-1">
+              The big picture
+            </h2>
+            <p className="text-sm text-gray-500 mb-3">
+              Four numbers that tell the story of Washington State&apos;s FY2022
+              budget at a glance. Click any card to understand what it means.
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <StatCard statKey="Total Spend" />
+              <StatCard statKey="Largest Agency" />
+              <StatCard statKey="Vendors Paid" />
+              <StatCard statKey="Biggest Category" />
+            </div>
           </div>
 
           {/* 2. Persona selector */}
