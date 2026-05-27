@@ -9,7 +9,7 @@ interface PennyCharacterProps {
 export function PennyCharacter({ animation }: PennyCharacterProps) {
   return (
     <div
-      className={`penny-character penny-${animation}`}
+      className={`penny-character penny-${animation} relative`}
       aria-hidden="true"
     >
       <svg
