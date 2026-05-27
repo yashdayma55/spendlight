@@ -12,11 +12,6 @@ import AboutSection from "@/components/AboutSection";
 import PersonaSelector, { type Persona } from "@/components/PersonaSelector";
 import HowToUse from "@/components/HowToUse";
 import WelcomeScreen from "@/components/WelcomeScreen";
-import { FISCAL_METADATA } from "@/lib/data";
-
-const formatNumber = (n: number) =>
-  n.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-
 const STAT_DETAILS = {
   "Total Spend": {
     value: "$29.5B",
@@ -122,7 +117,6 @@ function HomeContent({
   onPersonaSelect: (persona: Persona) => void;
 }) {
   const penny = usePenny();
-  const totalB = (FISCAL_METADATA.total_spend / 1e9).toFixed(1);
 
   return (
     <>
