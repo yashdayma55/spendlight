@@ -218,17 +218,22 @@ function HomeContent({
             />
           </div>
 
-          {/* 7. Governance Log */}
-          <div className="mb-6" onClick={(e) => e.stopPropagation()}>
-            <GovernanceLog logs={logs} />
+          {/* 8–10. Technical details */}
+          <div className="mt-8 pt-6 border-t border-gray-200">
+            <p className="text-xs text-gray-400 uppercase tracking-widest font-mono text-center mb-6">
+              For the technically curious
+            </p>
+
+            <div className="mb-6" onClick={(e) => e.stopPropagation()}>
+              <GovernanceLog logs={logs} />
+            </div>
+
+            <div onClick={(e) => e.stopPropagation()}>
+              <AboutSection />
+            </div>
           </div>
 
-          {/* 8. About */}
-          <div onClick={(e) => e.stopPropagation()}>
-            <AboutSection />
-          </div>
-
-          {/* 9. Footer */}
+          {/* Footer */}
           <p className="text-center text-xs text-gray-300 mt-8 dismiss-penny">
             Built with Next.js · RAG · Claude API · Washington State Open Data
           </p>
