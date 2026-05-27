@@ -1,36 +1,80 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Spendlight
 
-## Getting Started
+**Follow the Money** — an AI-powered web app that helps non-technical users explore Washington State's FY2022 public spending data ($29.5B across 451,029 vendor payments).
 
-First, run the development server:
+Built for the [Golden Analytics](https://goldenanalytics.com) take-home challenge.
+
+## Features
+
+- **Real CSV parsing** — aggregates computed at build time from the official Open Checkbook vendor payments file
+- **Interactive charts** — agencies, categories, monthly trends, and top vendors (click any element for an explanation)
+- **RAG-powered chat** — keyword retrieval over six data chunks, then Claude answers in plain English
+- **Story Mode** — one-click newsworthy insights as JSON cards
+- **Penny** — cartoon financial analyst with idle / thinking / talking animations and Claude-generated speech bubbles
+- **AI governance log** — every Claude API call logged in-session with tokens, chunks, and timestamps
+
+## Quick start
+
+### 1. Install dependencies
+
+```bash
+npm install
+```
+
+### 2. Add the data file
+
+Download vendor payments for the **2021–23 biennium** from [Washington State Open Checkbook](https://fiscal.wa.gov/Spending/Checkbook2123) and place the FY2022 CSV at:
+
+```
+public/data/Vendor-Payments_2021-23_FY_2022_.csv
+```
+
+See [public/data/README.md](public/data/README.md) for details. If you have the biennium `.xlsx`, export the **FY 2022** sheet to CSV with the filename above.
+
+### 3. Configure Claude
+
+Create `.env.local` (not committed):
+
+```
+ANTHROPIC_API_KEY=your_key_here
+```
+
+### 4. Run
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+`npm run dev` and `npm run build` automatically run `npm run generate-data` to parse the CSV into `src/lib/spending-data.json`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Scripts
 
-## Learn More
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start dev server (regenerates data first) |
+| `npm run build` | Production build |
+| `npm run generate-data` | Parse CSV → `spending-data.json` |
 
-To learn more about Next.js, take a look at the following resources:
+## Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Next.js 16 (App Router) · TypeScript · Tailwind CSS
+- Recharts · PapaParse · Claude (`claude-sonnet-4-20250514`)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project structure
 
-## Deploy on Vercel
+```
+src/
+  app/api/chat/     # Claude + RAG API route
+  components/       # Charts, ChatBox, StoryMode, Penny, GovernanceLog
+  lib/
+    parseData.ts    # CSV aggregation (Node/fs)
+    data.ts         # Re-exports generated JSON for charts + RAG
+    rag.ts          # Chunk retrieval
+public/data/        # Place CSV here (gitignored)
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## License
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT — data © Washington State Open Checkbook.
