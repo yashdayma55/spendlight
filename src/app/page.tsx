@@ -53,17 +53,20 @@ function HomeContent({
       >
         <div className="max-w-5xl mx-auto px-4 py-10">
           <div className="mb-8 dismiss-penny">
-            <p className="text-xs font-mono text-gray-400 uppercase tracking-widest mb-1">
-              Washington State · Fiscal Year 2022
+            <p className="text-xs font-mono text-gray-400 uppercase tracking-widest mb-2">
+              Washington State · Fiscal Year 2022 · Public Data
             </p>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">
-              Follow the Money
+            <h1 className="text-4xl font-bold text-gray-900 mb-3">
+              Follow the Money 💰
             </h1>
-            <p className="text-gray-500 text-base">
-              ${totalB}B in public spending ·{" "}
-              {formatNumber(FISCAL_METADATA.total_transactions)} payments ·{" "}
-              {formatNumber(FISCAL_METADATA.num_vendors)} vendors · Ask anything
-              below
+            <p className="text-lg text-gray-600 mb-2 max-w-2xl">
+              Washington State spent <strong>$29.5 billion</strong> of public
+              money in 2022. This tool helps you understand where it went — no
+              spreadsheets, no SQL, no data skills needed.
+            </p>
+            <p className="text-sm text-blue-600 font-medium">
+              👇 Start by clicking &quot;Find the story&quot; below — or ask
+              Penny anything by clicking her in the bottom right corner.
             </p>
           </div>
 

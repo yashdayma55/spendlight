@@ -175,13 +175,18 @@ export default function StoryMode({
       className="bg-white rounded-2xl border border-gray-200 p-6"
       onClick={(e) => e.stopPropagation()}
     >
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
         <div>
-          <h2 className="text-base font-semibold text-gray-800 flex items-center gap-2">
-            <span>📰</span> What's the story here?
-          </h2>
-          <p className="text-sm text-gray-500 mt-0.5">
-            Let AI surface the most newsworthy findings from this data
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-xl">📰</span>
+            <h2 className="text-lg font-bold text-gray-900">
+              Start here — What&apos;s the biggest story?
+            </h2>
+          </div>
+          <p className="text-sm text-gray-500">
+            Not sure where to begin? Click the button and AI will instantly
+            find the 3 most surprising, newsworthy findings in this data. No
+            data skills needed.
           </p>
         </div>
 
@@ -189,15 +194,15 @@ export default function StoryMode({
           <button
             onClick={generateStory}
             disabled={loading}
-            className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+            className="px-6 py-3 bg-gray-900 text-white text-sm font-semibold rounded-xl hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 whitespace-nowrap shadow-sm"
           >
             {loading ? (
               <>
                 <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Analyzing…
+                Finding stories…
               </>
             ) : (
-              "Generate insights ↗"
+              "✨ Find the story ↗"
             )}
           </button>
         )}
@@ -208,9 +213,9 @@ export default function StoryMode({
               setInsights([]);
               setGenerated(false);
             }}
-            className="text-sm text-gray-400 hover:text-gray-600 transition-all"
+            className="text-sm text-gray-400 hover:text-gray-600 transition-all whitespace-nowrap"
           >
-            Regenerate
+            ↺ Regenerate
           </button>
         )}
       </div>
