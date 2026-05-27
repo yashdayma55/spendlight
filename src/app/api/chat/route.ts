@@ -74,9 +74,9 @@ export async function POST(request: NextRequest) {
       storyMode?: boolean;
     };
 
-    // Step 1 — Run RAG to find relevant chunks (skip for story mode JSON prompts)
+    // Step 1 — Run RAG to find relevant chunks
     const { context, chunksUsed } = storyMode
-      ? { context: "", chunksUsed: ["all"] as string[] }
+      ? { context: question, chunksUsed: ["all"] }
       : buildContext(question);
 
     // Step 2 — Build governance log entry for this request
@@ -100,9 +100,10 @@ export async function POST(request: NextRequest) {
       },
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
-        max_tokens: 1024,
-        system: buildSystemPrompt(context, pennyMode),
         max_tokens: pennyMode ? 256 : 1024,
+        system: storyMode
+          ? "You are a data journalist. Follow the user instructions exactly. Respond only with valid JSON — no markdown, no extra text."
+          : buildSystemPrompt(context, pennyMode),
         messages: messages.map((m) => ({
           role: m.role,
           content: m.content,
