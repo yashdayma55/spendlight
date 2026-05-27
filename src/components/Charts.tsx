@@ -532,6 +532,66 @@ export default function Charts() {
       className="bg-white rounded-2xl border border-gray-200 p-6"
       onClick={(e) => e.stopPropagation()}
     >
+      <div className="mb-5 pb-5 border-b border-gray-100">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-7 h-7 bg-gray-900 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">
+            3
+          </div>
+          <h2 className="text-lg font-bold text-gray-800">
+            Explore the data — 4 different lenses
+          </h2>
+        </div>
+        <p className="text-sm text-gray-500 mb-4 ml-9">
+          We organized the data into 4 views because different questions need
+          different angles. Pick the one that matches what you want to understand:
+        </p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 ml-9">
+          <button
+            type="button"
+            className="bg-gray-50 rounded-lg p-3 border border-gray-200 text-left cursor-pointer hover:border-blue-300 hover:bg-blue-50 transition-all"
+            onClick={() => setActiveTab("agencies")}
+          >
+            <p className="text-xs font-bold text-gray-800 mb-1">🏛️ By Agency</p>
+            <p className="text-xs text-gray-500">
+              &quot;Which government departments spent the most?&quot;
+            </p>
+          </button>
+          <button
+            type="button"
+            className="bg-gray-50 rounded-lg p-3 border border-gray-200 text-left cursor-pointer hover:border-blue-300 hover:bg-blue-50 transition-all"
+            onClick={() => setActiveTab("categories")}
+          >
+            <p className="text-xs font-bold text-gray-800 mb-1">📂 By Type</p>
+            <p className="text-xs text-gray-500">
+              &quot;What was the money actually spent on — grants, salaries,
+              buildings?&quot;
+            </p>
+          </button>
+          <button
+            type="button"
+            className="bg-gray-50 rounded-lg p-3 border border-gray-200 text-left cursor-pointer hover:border-blue-300 hover:bg-blue-50 transition-all"
+            onClick={() => setActiveTab("monthly")}
+          >
+            <p className="text-xs font-bold text-gray-800 mb-1">📅 Month by Month</p>
+            <p className="text-xs text-gray-500">
+              &quot;Did spending go up or down throughout the year? When were the
+              big spikes?&quot;
+            </p>
+          </button>
+          <button
+            type="button"
+            className="bg-gray-50 rounded-lg p-3 border border-gray-200 text-left cursor-pointer hover:border-blue-300 hover:bg-blue-50 transition-all"
+            onClick={() => setActiveTab("vendors")}
+          >
+            <p className="text-xs font-bold text-gray-800 mb-1">🏢 Top Vendors</p>
+            <p className="text-xs text-gray-500">
+              &quot;Which companies and organizations received the most public
+              money?&quot;
+            </p>
+          </button>
+        </div>
+      </div>
+
       <div className="flex flex-wrap gap-2 mb-2">
         {tabs.map((tab) => (
           <TabButton
