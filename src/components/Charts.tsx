@@ -217,82 +217,114 @@ function AgencyChart({ onBarClick }: { onBarClick: (name: string, value: number)
 }
 
 function CategoryChart({
-  onSliceClick,
+  onPennyExplain,
 }: {
-  onSliceClick: (name: string, value: number) => void;
+  onPennyExplain?: (context: string) => void;
 }) {
   const data = Object.entries(CATEGORY_TOTALS).map(([name, value]) => ({
     name,
     value,
+    displayName: name.length > 30 ? name.slice(0, 30) + "…" : name,
   }));
+
   const total = data.reduce((sum, d) => sum + d.value, 0);
+
+  const categoryColors = [
+    "#1d4ed8",
+    "#0f766e",
+    "#b45309",
+    "#7c3aed",
+    "#be185d",
+    "#065f46",
+    "#92400e",
+    "#1e40af",
+    "#6d28d9",
+  ];
+
+  const handleClick = (entry: { name: string }) => {
+    if (entry?.name && onPennyExplain) {
+      const amount = CATEGORY_TOTALS[entry.name];
+      if (amount == null) return;
+      const pct = ((amount / total) * 100).toFixed(1);
+      onPennyExplain(
+        `The user clicked on the "${entry.name}" category in the spending breakdown pie chart. This category received $${(amount / 1e9).toFixed(1)}B which is ${pct}% of the total state budget. Explain in 2 plain conversational sentences what this category means and why it matters. No bullet points or dashes. Write as flowing sentences only.`
+      );
+    }
+  };
 
   return (
     <div>
-      <p className="text-sm text-gray-500 mb-4">
+      <p className="text-sm text-gray-500 mb-1">
         79% of all spending is Grants, Benefits and Client Services — direct
         payments to people and service providers.
       </p>
-      <p className="text-xs text-blue-500 mb-3 font-medium">
-        💡 Click any slice to understand what this category of spending means
+      <p className="text-xs text-blue-500 mb-4 font-medium">
+        💡 Click any slice to understand what this category means
       </p>
-      <div className="flex flex-col md:flex-row items-center gap-6">
-        <ResponsiveContainer width="100%" height={300}>
-          <PieChart>
-            <Pie
-              data={data}
-              dataKey="value"
-              nameKey="name"
-              cx="50%"
-              cy="50%"
-              outerRadius={110}
-              className="cursor-pointer"
-              label={({ name, value }) =>
-                `${name}: ${((value / total) * 100).toFixed(0)}%`
-              }
-              onClick={(_, index) => {
-                const item = data[index];
-                if (item) onSliceClick(item.name, item.value);
-              }}
-            >
-              {data.map((_, index) => (
-                <Cell
-                  key={index}
-                  fill={COLORS[index % COLORS.length]}
-                  className="hover:opacity-80 transition-opacity cursor-pointer"
-                />
-              ))}
-            </Pie>
-            <Tooltip
-              content={<CustomTooltip totalBudget={TOTAL_BUDGET} />}
-            />
-          </PieChart>
-        </ResponsiveContainer>
-        <div className="flex flex-col gap-2 min-w-[200px]">
+
+      <div className="flex flex-col md:flex-row items-start gap-6">
+        <div className="flex-shrink-0">
+          <ResponsiveContainer width={280} height={280}>
+            <PieChart>
+              <Pie
+                data={data}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                outerRadius={120}
+                innerRadius={50}
+                onClick={(entry) => handleClick(entry as { name: string })}
+                cursor="pointer"
+                label={false}
+                labelLine={false}
+              >
+                {data.map((_, index) => (
+                  <Cell
+                    key={index}
+                    fill={categoryColors[index % categoryColors.length]}
+                    stroke="white"
+                    strokeWidth={2}
+                  />
+                ))}
+              </Pie>
+              <Tooltip
+                formatter={(value: number, name: string) => [
+                  `$${(Number(value) / 1e9).toFixed(1)}B (${((Number(value) / total) * 100).toFixed(1)}%)`,
+                  name,
+                ]}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="flex flex-col gap-2 flex-1 pt-2">
           {data.map((d, i) => (
-            <button
+            <div
               key={d.name}
-              type="button"
-              onClick={() => onSliceClick(d.name, d.value)}
-              className="flex items-center gap-2 text-left hover:bg-gray-50 rounded p-1 transition-colors"
+              role="button"
+              tabIndex={0}
+              className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 rounded-lg p-1.5 transition-all"
+              onClick={() => handleClick(d)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") handleClick(d);
+              }}
             >
               <div
                 className="w-3 h-3 rounded-sm flex-shrink-0"
-                style={{ background: COLORS[i % COLORS.length] }}
+                style={{ background: categoryColors[i % categoryColors.length] }}
               />
-              <span className="text-xs text-gray-600">
-                {d.name.length > 28 ? d.name.slice(0, 28) + "…" : d.name}
+              <span className="text-xs text-gray-600 flex-1">{d.displayName}</span>
+              <span className="text-xs font-semibold text-gray-800 ml-auto whitespace-nowrap">
+                ${(d.value / 1e9).toFixed(1)}B
               </span>
-              <span className="text-xs font-medium text-gray-800 ml-auto">
-                {fmt(d.value)}
+              <span className="text-xs text-gray-400 w-10 text-right">
+                {((d.value / total) * 100).toFixed(0)}%
               </span>
-            </button>
+            </div>
           ))}
         </div>
       </div>
-      <p className="text-xs text-blue-500 mt-2 italic">
-        Click any slice to learn more
-      </p>
     </div>
   );
 }
@@ -445,12 +477,6 @@ export default function Charts() {
     );
   };
 
-  const explainCategory = (name: string, value: number) => {
-    penny.explain(
-      `The user clicked the spending category "${name}" (${fmt(value)}, ${pctOfTotal(value)}% of total). Explain what this category means for everyday people, in 2 plain English sentences.`
-    );
-  };
-
   const explainVendor = (name: string, value: number) => {
     penny.explain(
       `The user clicked vendor "${name}" who received ${fmt(value)} (${pctOfTotal(value)}% of state spending). Explain who they are and why the state pays them, in 2 plain English sentences.`
@@ -483,7 +509,7 @@ export default function Charts() {
 
       {activeTab === "agencies" && <AgencyChart onBarClick={explainAgency} />}
       {activeTab === "categories" && (
-        <CategoryChart onSliceClick={explainCategory} />
+        <CategoryChart onPennyExplain={(ctx) => penny.explain(ctx)} />
       )}
       {activeTab === "monthly" && (
         <MonthlyChart onPennyExplain={(ctx) => penny.explain(ctx)} />
