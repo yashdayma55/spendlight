@@ -148,6 +148,10 @@ function AgencyChart({ onBarClick }: { onBarClick: (name: string, value: number)
         Top 10 agencies by total spend — Health Care Authority alone accounts
         for 44% of the entire state budget.
       </p>
+      <p className="text-xs text-blue-500 mb-3 font-medium">
+        💡 Click any bar and Penny will explain what that agency does and why
+        they spent this amount
+      </p>
       <ResponsiveContainer width="100%" height={350}>
         <BarChart data={data} layout="vertical" margin={{ left: 20, right: 40 }}>
           <XAxis type="number" tickFormatter={fmt} tick={{ fontSize: 11 }} />
@@ -187,6 +191,9 @@ function CategoryChart({
       <p className="text-sm text-gray-500 mb-4">
         79% of all spending is Grants, Benefits and Client Services — direct
         payments to people and service providers.
+      </p>
+      <p className="text-xs text-blue-500 mb-3 font-medium">
+        💡 Click any slice to understand what this category of spending means
       </p>
       <div className="flex flex-col md:flex-row items-center gap-6">
         <ResponsiveContainer width="100%" height={300}>
@@ -291,6 +298,10 @@ function MonthlyChart({
         Spending peaks in July ($3.4B) and September ($3.2B) — the start of
         the fiscal year when annual grants and contracts are issued.
       </p>
+      <p className="text-xs text-blue-500 mb-3 font-medium">
+        💡 Click any data point to understand why spending was high or low that
+        month
+      </p>
       <ResponsiveContainer width="100%" height={300}>
         <LineChart
           data={data}
@@ -337,6 +348,10 @@ function VendorChart({ onBarClick }: { onBarClick: (name: string, value: number)
       <p className="text-sm text-gray-500 mb-4">
         The top 6 vendors are all healthcare companies — reflecting how
         dominant managed care contracts are in the state budget.
+      </p>
+      <p className="text-xs text-blue-500 mb-3 font-medium">
+        💡 Click any bar to learn who this vendor is and why they received this
+        much public money
       </p>
       <ResponsiveContainer width="100%" height={350}>
         <BarChart data={data} layout="vertical" margin={{ left: 20, right: 40 }}>
