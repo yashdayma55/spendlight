@@ -127,43 +127,6 @@ function CustomTooltip({
   return null;
 }
 
-function MonthTooltip({
-  active,
-  payload,
-  label,
-  totalBudget,
-}: {
-  active?: boolean;
-  payload?: { value: number }[];
-  label?: string;
-  totalBudget?: number;
-}) {
-  if (active && payload && payload.length) {
-    const value = payload[0].value;
-    const pct = totalBudget
-      ? ((value / totalBudget) * 100).toFixed(1)
-      : null;
-
-    return (
-      <div className="bg-white border border-gray-200 rounded-xl p-3 shadow-lg max-w-48">
-        <p className="text-sm font-semibold text-gray-800 mb-1">{label}</p>
-        <p className="text-lg font-bold text-blue-600">
-          {formatTooltipBillions(value)}
-        </p>
-        {pct && (
-          <p className="text-xs text-gray-500 mt-1">
-            {pct}% of total state budget
-          </p>
-        )}
-        <p className="text-xs text-blue-500 mt-2 font-medium">
-          Click to learn more →
-        </p>
-      </div>
-    );
-  }
-  return null;
-}
-
 function ClickHint() {
   return (
     <p className="text-xs text-blue-500 mt-2 italic">
@@ -241,10 +204,9 @@ function CategoryChart({
     "#6d28d9",
   ];
 
-  const handleClick = (entry: { name: string }) => {
+  const handleClick = (entry: { name: string; value: number }) => {
     if (entry?.name && onPennyExplain) {
-      const amount = CATEGORY_TOTALS[entry.name];
-      if (amount == null) return;
+      const amount = entry.value;
       const pct = ((amount / total) * 100).toFixed(1);
       onPennyExplain(
         `The user clicked on the "${entry.name}" category in the spending breakdown pie chart. This category received $${(amount / 1e9).toFixed(1)}B which is ${pct}% of the total state budget. Explain in 2 plain conversational sentences what this category means and why it matters. No bullet points or dashes. Write as flowing sentences only.`
@@ -274,7 +236,10 @@ function CategoryChart({
                 cy="50%"
                 outerRadius={120}
                 innerRadius={50}
-                onClick={(entry) => handleClick(entry as { name: string })}
+                onClick={(_, index) => {
+                  const entry = data[index];
+                  if (entry) handleClick(entry);
+                }}
                 cursor="pointer"
                 label={false}
                 labelLine={false}
@@ -289,10 +254,13 @@ function CategoryChart({
                 ))}
               </Pie>
               <Tooltip
-                formatter={(value: number, name: string) => [
-                  `$${(Number(value) / 1e9).toFixed(1)}B (${((Number(value) / total) * 100).toFixed(1)}%)`,
-                  name,
-                ]}
+                formatter={(value, name) => {
+                  const n = Number(value);
+                  return [
+                    `$${(n / 1e9).toFixed(1)}B (${((n / total) * 100).toFixed(1)}%)`,
+                    String(name),
+                  ];
+                }}
               />
             </PieChart>
           </ResponsiveContainer>
@@ -329,84 +297,153 @@ function CategoryChart({
   );
 }
 
+const MONTH_CONTEXT: Record<string, string> = {
+  Jul: "July is the first month of Washington's fiscal year. Spending is typically high because annual grants, contracts and benefit payments are issued at the start of the fiscal year.",
+  Aug: "August is typically a quieter month as the initial burst of fiscal year payments settles down.",
+  Sep: "September often sees a second spike as quarterly payments and grant disbursements go out.",
+  Oct: "October is mid-fall and typically a steady spending month with regular ongoing payments.",
+  Nov: "November is one of the lower spending months, with regular ongoing payments but fewer large disbursements.",
+  Dec: "December sees high spending as agencies rush to use remaining budget allocations before year end reviews.",
+  Jan: "January marks the mid-point of the fiscal year with steady ongoing payments.",
+  Feb: "February is typically steady with regular benefit and vendor payments continuing.",
+  Mar: "March sees consistent spending as the fiscal year approaches its final quarter.",
+  Apr: "April is in the final quarter of the fiscal year with agencies managing remaining budgets.",
+  May: "May is near fiscal year end and agencies are finalizing annual spending.",
+  Jun: "June is the final month of the fiscal year. Spending may include final contract payments and year-end disbursements.",
+};
+
 function MonthlyChart({
   onPennyExplain,
 }: {
-  onPennyExplain: (context: string) => void;
+  onPennyExplain?: (context: string) => void;
 }) {
   const data = Object.entries(MONTHLY_SPEND).map(([month, value]) => ({
     month,
     value,
   }));
 
-  const monthlyAverage =
-    Object.values(MONTHLY_SPEND).reduce((a, b) => a + b, 0) / 12;
+  const total = Object.values(MONTHLY_SPEND).reduce((a, b) => a + b, 0);
+  const average = total / 12;
 
-  const buildMonthContext = (month: string, amount: number) => {
+  const handleClick = (chartState: { activeLabel?: string | number }) => {
+    if (chartState?.activeLabel == null || !onPennyExplain) return;
+
+    const month = String(chartState.activeLabel);
+    const monthData = MONTHLY_SPEND[month as keyof typeof MONTHLY_SPEND];
+
+    if (!monthData) return;
+
+    const amount = monthData;
     const amountFormatted = `$${(amount / 1e9).toFixed(1)}B`;
-    const avg = monthlyAverage;
-    const aboveBelow = amount > avg ? "above" : "below";
+    const avgFormatted = `$${(average / 1e9).toFixed(1)}B`;
+    const aboveBelow = amount > average ? "above" : "below";
+    const diffPct = Math.abs(((amount - average) / average) * 100).toFixed(0);
+    const context = MONTH_CONTEXT[month] || "";
 
-    return `The user clicked on ${month} in the monthly spending chart. 
-    ${month} had spending of ${amountFormatted}. 
-    The monthly average is $${(avg / 1e9).toFixed(1)}B so this month is ${aboveBelow} average.
-    Fiscal year starts in July. Peaks happen in July, September and December 
-    when annual grants and contracts are issued.
-    Explain this month's spending in 2 plain English sentences.`;
+    onPennyExplain(
+      `The user clicked on ${month} in the monthly spending chart. ${month} had total spending of ${amountFormatted}. The monthly average across FY2022 is ${avgFormatted}, so ${month} is ${diffPct}% ${aboveBelow} average. ${context} Explain specifically why ${month} had ${amountFormatted} in spending in 2 plain conversational sentences. Reference the actual amount and whether it was above or below average. No bullet points, no dashes, write as flowing sentences only.`
+    );
   };
 
-  const handleMonthClick = (chartState: unknown) => {
-    const state = chartState as {
-      activeLabel?: string;
-      activePayload?: { value: number }[];
-    };
-    if (state?.activePayload?.[0] && state.activeLabel) {
-      const month = state.activeLabel;
-      const amount = state.activePayload[0].value;
-      onPennyExplain(buildMonthContext(month, amount));
-    }
+  const CustomDot = (props: {
+    cx?: number;
+    cy?: number;
+    payload?: { month: string; value: number };
+  }) => {
+    const { cx, cy } = props;
+    if (cx == null || cy == null) return null;
+    return (
+      <circle
+        cx={cx}
+        cy={cy}
+        r={6}
+        fill="#1d4ed8"
+        stroke="white"
+        strokeWidth={2}
+        style={{ cursor: "pointer" }}
+      />
+    );
+  };
+
+  const CustomActiveDot = (props: { cx?: number; cy?: number }) => {
+    const { cx, cy } = props;
+    if (cx == null || cy == null) return null;
+    return (
+      <circle
+        cx={cx}
+        cy={cy}
+        r={9}
+        fill="#1d4ed8"
+        stroke="white"
+        strokeWidth={3}
+        style={{ cursor: "pointer" }}
+      />
+    );
   };
 
   return (
     <div>
-      <p className="text-sm text-gray-500 mb-4">
+      <p className="text-sm text-gray-500 mb-1">
         Spending peaks in July ($3.4B) and September ($3.2B) — the start of
         the fiscal year when annual grants and contracts are issued.
       </p>
-      <p className="text-xs text-blue-500 mb-3 font-medium">
+      <p className="text-xs text-blue-500 mb-4 font-medium">
         💡 Click any data point to understand why spending was high or low that
         month
       </p>
       <ResponsiveContainer width="100%" height={300}>
         <LineChart
           data={data}
-          margin={{ left: 10, right: 20 }}
-          onClick={handleMonthClick}
+          margin={{ left: 10, right: 20, top: 10, bottom: 10 }}
+          onClick={handleClick}
+          style={{ cursor: "pointer" }}
         >
           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
           <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-          <YAxis tickFormatter={fmt} tick={{ fontSize: 11 }} />
+          <YAxis
+            tickFormatter={(v) => `$${(v / 1e9).toFixed(1)}B`}
+            tick={{ fontSize: 11 }}
+          />
           <Tooltip
-            content={<MonthTooltip totalBudget={TOTAL_BUDGET} />}
+            content={({ active, payload, label }) => {
+              if (active && payload && payload.length) {
+                const value = payload[0].value as number;
+                const pct = ((value / total) * 100).toFixed(1);
+                const aboveBelow = value > average ? "above" : "below";
+                const diffPct = Math.abs(
+                  ((value - average) / average) * 100
+                ).toFixed(0);
+                return (
+                  <div className="bg-white border border-gray-200 rounded-xl p-3 shadow-lg">
+                    <p className="text-sm font-bold text-gray-800">{label}</p>
+                    <p className="text-lg font-bold text-blue-600">
+                      ${(value / 1e9).toFixed(1)}B
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {pct}% of annual budget
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {diffPct}% {aboveBelow} monthly average
+                    </p>
+                    <p className="text-xs text-blue-500 mt-1 font-medium">
+                      Click to get Penny&apos;s explanation →
+                    </p>
+                  </div>
+                );
+              }
+              return null;
+            }}
           />
           <Line
             type="monotone"
             dataKey="value"
             stroke="#1d4ed8"
             strokeWidth={2.5}
-            dot={{
-              fill: "#1d4ed8",
-              r: 6,
-              cursor: "pointer",
-              strokeWidth: 2,
-            }}
-            activeDot={{ r: 9, cursor: "pointer" }}
+            dot={<CustomDot />}
+            activeDot={<CustomActiveDot />}
           />
         </LineChart>
       </ResponsiveContainer>
-      <p className="text-xs text-blue-500 mt-2 italic">
-        Click any point to learn more
-      </p>
     </div>
   );
 }
