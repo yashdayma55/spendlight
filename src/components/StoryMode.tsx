@@ -101,6 +101,7 @@ export default function StoryMode({
   const [loading, setLoading] = useState(false);
   const [generated, setGenerated] = useState(false);
   const [error, setError] = useState("");
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const penny = usePenny();
 
   const generateStory = async () => {
@@ -243,9 +244,22 @@ export default function StoryMode({
                 <h3 className="text-sm font-semibold text-gray-800 mb-1.5 leading-snug">
                   {insight.headline}
                 </h3>
-                <p className="text-xs text-gray-600 leading-relaxed">
+                <p className="text-xs text-gray-600 leading-relaxed mb-3">
                   {insight.explanation}
                 </p>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await navigator.clipboard.writeText(
+                      `${insight.headline}\n\n${insight.explanation}`
+                    );
+                    setCopiedIndex(i);
+                    setTimeout(() => setCopiedIndex(null), 2000);
+                  }}
+                  className="text-xs text-gray-400 hover:text-gray-600 transition-all flex items-center gap-1"
+                >
+                  {copiedIndex === i ? "✓ Copied!" : "📋 Copy this insight"}
+                </button>
               </div>
             );
           })}

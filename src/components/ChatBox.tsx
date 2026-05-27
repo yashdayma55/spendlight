@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { cleanAiText } from "@/lib/aiFormatting";
 import { usePenny } from "./PennyContext";
 
 interface Message {
@@ -56,7 +57,14 @@ export default function ChatBox({
   starterQuestions?: readonly string[];
 }) {
   const starterQuestions = starterQuestionsProp ?? STARTER_QUESTIONS;
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      role: "assistant",
+      content:
+        "Hi there! Ask me anything about Washington State's spending. Try something like \"Why does healthcare get so much money?\" or \"Who are the biggest vendors?\" — I'll explain it in plain English.",
+      chunksUsed: [],
+    },
+  ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -99,7 +107,9 @@ export default function ChatBox({
         throw new Error(data.error);
       }
 
-      const reply = data.reply || "Sorry, I could not generate a response.";
+      const reply = cleanAiText(
+        data.reply || "Sorry, I could not generate a response."
+      );
       const assistantMessage: Message = {
         role: "assistant",
         content: reply,
@@ -138,9 +148,9 @@ export default function ChatBox({
         </p>
       </div>
 
-      {messages.length === 0 && (
+      {!messages.some((m) => m.role === "user") && (
         <div className="flex flex-wrap gap-2 mb-4">
-          {STARTER_QUESTIONS.map((q) => (
+          {starterQuestions.map((q) => (
             <button
               key={q}
               onClick={() => sendMessage(q)}
