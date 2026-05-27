@@ -24,3 +24,87 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Penny assistant animations */
+.penny-character {
+  display: inline-block;
+}
+
+.penny-idle {
+  animation: penny-float 3s ease-in-out infinite;
+}
+
+.penny-thinking .penny-eyes {
+  transform: translateY(-4px);
+}
+
+.penny-thinking::after {
+  content: "";
+  position: absolute;
+  top: -8px;
+  right: 8px;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #1d4ed8;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: penny-spin 0.8s linear infinite;
+}
+
+.penny-talking {
+  animation: penny-bounce 0.4s ease-in-out infinite;
+}
+
+.penny-talking .penny-mouth {
+  animation: penny-mouth 0.25s ease-in-out infinite alternate;
+}
+
+@keyframes penny-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes penny-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes penny-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes penny-mouth {
+  from {
+    d: path("M50 66 Q60 72 70 66");
+  }
+  to {
+    d: path("M50 64 Q60 74 70 64");
+  }
+}
+
+.penny-bubble-enter {
+  animation: penny-bubble-in 0.35s ease-out forwards;
+}
+
+@keyframes penny-bubble-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
