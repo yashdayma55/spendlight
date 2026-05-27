@@ -135,29 +135,41 @@ function HomeContent({
         }}
       >
         <div className="max-w-5xl mx-auto px-4 py-10">
-          {/* 1. Header */}
-          <div className="mb-8 dismiss-penny">
-            <div className="mb-2 flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-lg">
+          {/* 1. Hero */}
+          <div className="bg-white rounded-2xl border border-gray-200 p-8 mb-6 text-center dismiss-penny">
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-xl">
                 S
               </div>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 leading-tight">
-                  Spendlight
-                </h1>
-                <p className="text-xs text-gray-400 font-mono uppercase tracking-widest">
-                  Washington State · Fiscal Year 2022
-                </p>
+              <h1 className="text-4xl font-bold text-gray-900">Spendlight</h1>
+            </div>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-2">
+              Washington State spent{" "}
+              <strong className="text-gray-900">$29.5 billion</strong> of your
+              public money in 2022.
+            </p>
+            <p className="text-lg text-gray-500 max-w-xl mx-auto mb-6">
+              This tool helps journalists, city officials, and curious citizens
+              understand exactly where it went — no spreadsheets, no SQL, no data
+              skills needed.
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <div className="flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-medium">
+                <span>✦</span>
+                <span>Ask questions in plain English</span>
+              </div>
+              <div className="flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-medium">
+                <span>📊</span>
+                <span>Click any chart for instant explanations</span>
+              </div>
+              <div className="flex items-center gap-2 bg-purple-50 text-purple-700 px-4 py-2 rounded-full text-sm font-medium">
+                <span>📰</span>
+                <span>AI surfaces the biggest stories automatically</span>
               </div>
             </div>
-            <p className="text-lg text-gray-600 mb-2 max-w-2xl">
-              Washington State spent <strong>$29.5 billion</strong> of public
-              money in 2022. This tool helps you understand where it went — no
-              spreadsheets, no SQL, no data skills needed.
-            </p>
-            <p className="text-sm text-blue-600 font-medium">
-              👇 Start by clicking &quot;Find the story&quot; below — or ask
-              Penny anything by clicking her in the bottom right corner.
+            <p className="text-sm text-blue-600 font-medium mt-6">
+              👇 Scroll down to start exploring — or click Penny in the bottom right
+              corner anytime for help
             </p>
           </div>
 
