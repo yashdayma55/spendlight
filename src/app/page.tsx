@@ -17,13 +17,95 @@ import { FISCAL_METADATA } from "@/lib/data";
 const formatNumber = (n: number) =>
   n.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
-function StatCard({ label, value }: { label: string; value: string }) {
+const STAT_DETAILS = {
+  "Total Spend": {
+    value: "$29.5B",
+    icon: "💰",
+    color: "blue" as const,
+    detail:
+      "Washington State paid out $29,535,369,459 across 451,029 individual transactions in Fiscal Year 2022. That works out to roughly $3,800 for every person living in Washington State.",
+    subtext: "FY2022 total vendor payments",
+  },
+  "Largest Agency": {
+    value: "Health Care Authority",
+    icon: "🏥",
+    color: "green" as const,
+    detail:
+      "The Health Care Authority received $13.1 billion — that's 44 cents of every dollar the state spent. Most of this funds Medicaid managed care, paying health insurance companies to cover low-income residents.",
+    subtext: "$13.1B — 44% of total budget",
+  },
+  "Vendors Paid": {
+    value: "65,494",
+    icon: "🏢",
+    color: "purple" as const,
+    detail:
+      "Washington State paid 65,494 unique vendors in FY2022 — from giant healthcare companies receiving billions to small local contractors receiving a few hundred dollars. The top 10 vendors alone account for over 40% of all spending.",
+    subtext: "Unique businesses and organizations",
+  },
+  "Biggest Category": {
+    value: "Grants & Benefits",
+    icon: "🤝",
+    color: "orange" as const,
+    detail:
+      "Grants, Benefits and Client Services account for $23.3 billion — 79% of all spending. This is direct money going to people: Medicaid payments, housing assistance, food benefits, and social services. Less than 13% goes to buying goods and services.",
+    subtext: "$23.3B — 79% of all spending",
+  },
+};
+
+function StatCard({ statKey }: { statKey: keyof typeof STAT_DETAILS }) {
+  const [expanded, setExpanded] = useState(false);
+  const stat = STAT_DETAILS[statKey];
+
+  const colorMap = {
+    blue: "hover:border-blue-300 hover:bg-blue-50",
+    green: "hover:border-green-300 hover:bg-green-50",
+    purple: "hover:border-purple-300 hover:bg-purple-50",
+    orange: "hover:border-orange-300 hover:bg-orange-50",
+  };
+
+  const iconBgMap = {
+    blue: "bg-blue-100",
+    green: "bg-green-100",
+    purple: "bg-purple-100",
+    orange: "bg-orange-100",
+  };
+
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-4">
-      <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">
-        {label}
-      </p>
-      <p className="text-xl font-semibold text-gray-800">{value}</p>
+    <div
+      className={`bg-white rounded-xl border-2 border-gray-200 p-4 cursor-pointer transition-all duration-200 ${colorMap[stat.color]} ${expanded ? "border-gray-300 shadow-md" : ""}`}
+      onClick={() => setExpanded(!expanded)}
+    >
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">
+            {statKey}
+          </p>
+          <p className="text-xl font-bold text-gray-800">{stat.value}</p>
+          <p className="text-xs text-gray-400 mt-0.5">{stat.subtext}</p>
+        </div>
+        <div
+          className={`w-9 h-9 rounded-lg ${iconBgMap[stat.color]} flex items-center justify-center text-lg`}
+        >
+          {stat.icon}
+        </div>
+      </div>
+
+      {!expanded && (
+        <p className="text-xs text-gray-400 mt-2 flex items-center gap-1">
+          <span>Click to learn more</span>
+          <span>↓</span>
+        </p>
+      )}
+
+      {expanded && (
+        <div className="mt-3 pt-3 border-t border-gray-100">
+          <p className="text-sm text-gray-600 leading-relaxed">{stat.detail}</p>
+          <p className="text-xs text-gray-400 mt-2 flex items-center gap-1">
+            <span>Click to collapse</span>
+            <span>↑</span>
+          </p>
+        </div>
+      )}
     </div>
   );
 }
@@ -89,13 +171,10 @@ function HomeContent({
             className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6"
             onClick={(e) => e.stopPropagation()}
           >
-            <StatCard label="Total spend" value={`$${totalB}B`} />
-            <StatCard label="Largest agency" value="Health Care Authority" />
-            <StatCard
-              label="Vendors paid"
-              value={formatNumber(FISCAL_METADATA.num_vendors)}
-            />
-            <StatCard label="Biggest category" value="Grants & Benefits" />
+            <StatCard statKey="Total Spend" />
+            <StatCard statKey="Largest Agency" />
+            <StatCard statKey="Vendors Paid" />
+            <StatCard statKey="Biggest Category" />
           </div>
 
           {/* 2. Persona selector */}
