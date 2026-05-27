@@ -2,17 +2,27 @@
 
 import { useState } from "react";
 import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, LineChart, Line, CartesianGrid, Legend
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line,
+  CartesianGrid,
 } from "recharts";
 import {
   AGENCY_TOTALS,
   CATEGORY_TOTALS,
   MONTHLY_SPEND,
   TOP_VENDORS,
+  FISCAL_METADATA,
 } from "@/lib/data";
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+import { usePenny } from "./PennyContext";
 
 const fmt = (n: number) => {
   if (n >= 1e9) return `$${(n / 1e9).toFixed(1)}B`;
@@ -21,12 +31,35 @@ const fmt = (n: number) => {
 };
 
 const COLORS = [
-  "#1d4ed8", "#0f766e", "#b45309", "#7c3aed",
-  "#be185d", "#065f46", "#92400e", "#1e40af",
-  "#6d28d9", "#047857",
+  "#1d4ed8",
+  "#0f766e",
+  "#b45309",
+  "#7c3aed",
+  "#be185d",
+  "#065f46",
+  "#92400e",
+  "#1e40af",
+  "#6d28d9",
+  "#047857",
 ];
 
-// ─── Tab Button ───────────────────────────────────────────────────────────────
+const TAB_HINTS: Record<TabType, string> = {
+  agencies: "Top agencies by total spend — click any bar to learn more",
+  categories: "Spending by category — click any slice to learn more",
+  monthly: "Monthly spending in FY2022 — click any point to learn more",
+  vendors: "Top vendors paid — click any bar to learn more",
+};
+
+const TAB_ORIENTATION: Record<TabType, string> = {
+  agencies:
+    "This view shows which state agencies spent the most money in FY2022.",
+  categories:
+    "This chart breaks spending down by type — grants, goods, capital projects, and more.",
+  monthly:
+    "Here you can see how spending flowed month by month across the fiscal year.",
+  vendors:
+    "These are the companies and organizations that received the most payments.",
+};
 
 function TabButton({
   label,
@@ -51,29 +84,40 @@ function TabButton({
   );
 }
 
-// ─── Custom Tooltip ───────────────────────────────────────────────────────────
-
-function CustomTooltip({ active, payload, label }: any) {
+function CustomTooltip({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: { value: number }[];
+  label?: string;
+}) {
   if (active && payload && payload.length) {
     return (
       <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-md">
         <p className="text-sm font-medium text-gray-800">{label}</p>
-        <p className="text-sm text-blue-600 font-bold">
-          {fmt(payload[0].value)}
-        </p>
+        <p className="text-sm text-blue-600 font-bold">{fmt(payload[0].value)}</p>
       </div>
     );
   }
   return null;
 }
 
-// ─── Chart: Agencies ─────────────────────────────────────────────────────────
+function ClickHint() {
+  return (
+    <p className="text-xs text-blue-500 mt-2 italic">
+      Click any bar to learn more
+    </p>
+  );
+}
 
-function AgencyChart() {
+function AgencyChart({ onBarClick }: { onBarClick: (name: string, value: number) => void }) {
   const data = Object.entries(AGENCY_TOTALS)
     .slice(0, 10)
     .map(([name, value]) => ({
       name: name.length > 20 ? name.slice(0, 20) + "…" : name,
+      fullName: name,
       value,
     }));
 
@@ -88,21 +132,33 @@ function AgencyChart() {
           <XAxis type="number" tickFormatter={fmt} tick={{ fontSize: 11 }} />
           <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={160} />
           <Tooltip content={<CustomTooltip />} />
-          <Bar dataKey="value" fill="#1d4ed8" radius={[0, 4, 4, 0]} />
+          <Bar
+            dataKey="value"
+            fill="#1d4ed8"
+            radius={[0, 4, 4, 0]}
+            className="cursor-pointer hover:opacity-80"
+            onClick={(barData) => {
+              const row = (barData as { payload?: { fullName: string; value: number } })
+                .payload;
+              if (row) onBarClick(row.fullName, row.value);
+            }}
+          />
         </BarChart>
       </ResponsiveContainer>
+      <ClickHint />
     </div>
   );
 }
 
-// ─── Chart: Categories ───────────────────────────────────────────────────────
-
-function CategoryChart() {
+function CategoryChart({
+  onSliceClick,
+}: {
+  onSliceClick: (name: string, value: number) => void;
+}) {
   const data = Object.entries(CATEGORY_TOTALS).map(([name, value]) => ({
     name,
     value,
   }));
-
   const total = data.reduce((sum, d) => sum + d.value, 0);
 
   return (
@@ -121,20 +177,34 @@ function CategoryChart() {
               cx="50%"
               cy="50%"
               outerRadius={110}
+              className="cursor-pointer"
               label={({ name, value }) =>
-                `${((value / total) * 100).toFixed(0)}%`
+                `${name}: ${((value / total) * 100).toFixed(0)}%`
               }
+              onClick={(_, index) => {
+                const item = data[index];
+                if (item) onSliceClick(item.name, item.value);
+              }}
             >
               {data.map((_, index) => (
-                <Cell key={index} fill={COLORS[index % COLORS.length]} />
+                <Cell
+                  key={index}
+                  fill={COLORS[index % COLORS.length]}
+                  className="hover:opacity-80 transition-opacity cursor-pointer"
+                />
               ))}
             </Pie>
-            <Tooltip formatter={(value: number) => fmt(value)} />
+            <Tooltip formatter={(value) => fmt(Number(value))} />
           </PieChart>
         </ResponsiveContainer>
         <div className="flex flex-col gap-2 min-w-[200px]">
           {data.map((d, i) => (
-            <div key={d.name} className="flex items-center gap-2">
+            <button
+              key={d.name}
+              type="button"
+              onClick={() => onSliceClick(d.name, d.value)}
+              className="flex items-center gap-2 text-left hover:bg-gray-50 rounded p-1 transition-colors"
+            >
               <div
                 className="w-3 h-3 rounded-sm flex-shrink-0"
                 style={{ background: COLORS[i % COLORS.length] }}
@@ -145,17 +215,22 @@ function CategoryChart() {
               <span className="text-xs font-medium text-gray-800 ml-auto">
                 {fmt(d.value)}
               </span>
-            </div>
+            </button>
           ))}
         </div>
       </div>
+      <p className="text-xs text-blue-500 mt-2 italic">
+        Click any slice to learn more
+      </p>
     </div>
   );
 }
 
-// ─── Chart: Monthly ───────────────────────────────────────────────────────────
-
-function MonthlyChart() {
+function MonthlyChart({
+  onPointClick,
+}: {
+  onPointClick: (month: string, value: number) => void;
+}) {
   const data = Object.entries(MONTHLY_SPEND).map(([month, value]) => ({
     month,
     value,
@@ -178,22 +253,40 @@ function MonthlyChart() {
             dataKey="value"
             stroke="#1d4ed8"
             strokeWidth={2.5}
-            dot={{ fill: "#1d4ed8", r: 4 }}
-            activeDot={{ r: 6 }}
+            dot={(props) => {
+              const { cx, cy, payload } = props as {
+                cx: number;
+                cy: number;
+                payload: { month: string; value: number };
+              };
+              return (
+                <circle
+                  cx={cx}
+                  cy={cy}
+                  r={6}
+                  fill="#1d4ed8"
+                  className="cursor-pointer hover:opacity-70"
+                  onClick={() => onPointClick(payload.month, payload.value)}
+                />
+              );
+            }}
+            activeDot={{ r: 8 }}
           />
         </LineChart>
       </ResponsiveContainer>
+      <p className="text-xs text-blue-500 mt-2 italic">
+        Click any point to learn more
+      </p>
     </div>
   );
 }
 
-// ─── Chart: Vendors ───────────────────────────────────────────────────────────
-
-function VendorChart() {
+function VendorChart({ onBarClick }: { onBarClick: (name: string, value: number) => void }) {
   const data = Object.entries(TOP_VENDORS)
     .slice(0, 10)
     .map(([name, value]) => ({
       name: name.length > 22 ? name.slice(0, 22) + "…" : name,
+      fullName: name,
       value,
     }));
 
@@ -208,19 +301,29 @@ function VendorChart() {
           <XAxis type="number" tickFormatter={fmt} tick={{ fontSize: 11 }} />
           <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={170} />
           <Tooltip content={<CustomTooltip />} />
-          <Bar dataKey="value" fill="#0f766e" radius={[0, 4, 4, 0]} />
+          <Bar
+            dataKey="value"
+            fill="#0f766e"
+            radius={[0, 4, 4, 0]}
+            className="cursor-pointer hover:opacity-80"
+            onClick={(barData) => {
+              const row = (barData as { payload?: { fullName: string; value: number } })
+                .payload;
+              if (row) onBarClick(row.fullName, row.value);
+            }}
+          />
         </BarChart>
       </ResponsiveContainer>
+      <ClickHint />
     </div>
   );
 }
-
-// ─── Main Charts Component ────────────────────────────────────────────────────
 
 type TabType = "agencies" | "categories" | "monthly" | "vendors";
 
 export default function Charts() {
   const [activeTab, setActiveTab] = useState<TabType>("agencies");
+  const penny = usePenny();
 
   const tabs: { key: TabType; label: string }[] = [
     { key: "agencies", label: "By Agency" },
@@ -229,25 +332,60 @@ export default function Charts() {
     { key: "vendors", label: "Top Vendors" },
   ];
 
+  const pctOfTotal = (value: number) =>
+    ((value / FISCAL_METADATA.total_spend) * 100).toFixed(1);
+
+  const explainAgency = (name: string, value: number) => {
+    penny.explain(
+      `The user clicked the "${name}" agency in the spending chart. It received ${fmt(value)} (${pctOfTotal(value)}% of the $29.5B FY2022 total). Explain what this agency does and why its spending level matters, in 2 plain English sentences.`
+    );
+  };
+
+  const explainCategory = (name: string, value: number) => {
+    penny.explain(
+      `The user clicked the spending category "${name}" (${fmt(value)}, ${pctOfTotal(value)}% of total). Explain what this category means for everyday people, in 2 plain English sentences.`
+    );
+  };
+
+  const explainMonth = (month: string, value: number) => {
+    penny.explain(
+      `The user clicked ${month} on the monthly spending chart (${fmt(value)} in FY2022). Explain what might drive spending that month, in 2 plain English sentences.`
+    );
+  };
+
+  const explainVendor = (name: string, value: number) => {
+    penny.explain(
+      `The user clicked vendor "${name}" who received ${fmt(value)} (${pctOfTotal(value)}% of state spending). Explain who they are and why the state pays them, in 2 plain English sentences.`
+    );
+  };
+
+  const switchTab = (tab: TabType) => {
+    setActiveTab(tab);
+    penny.explain(
+      `The user just switched to the "${tabs.find((t) => t.key === tab)?.label}" chart tab. ${TAB_ORIENTATION[tab]} Give a one-sentence orientation to help them explore.`
+    );
+  };
+
   return (
     <div className="bg-white rounded-2xl border border-gray-200 p-6">
-      {/* Tab buttons */}
-      <div className="flex flex-wrap gap-2 mb-6">
+      <div className="flex flex-wrap gap-2 mb-2">
         {tabs.map((tab) => (
           <TabButton
             key={tab.key}
             label={tab.label}
             active={activeTab === tab.key}
-            onClick={() => setActiveTab(tab.key)}
+            onClick={() => switchTab(tab.key)}
           />
         ))}
       </div>
+      <p className="text-xs text-gray-400 mb-4">{TAB_HINTS[activeTab]}</p>
 
-      {/* Chart content */}
-      {activeTab === "agencies" && <AgencyChart />}
-      {activeTab === "categories" && <CategoryChart />}
-      {activeTab === "monthly" && <MonthlyChart />}
-      {activeTab === "vendors" && <VendorChart />}
+      {activeTab === "agencies" && <AgencyChart onBarClick={explainAgency} />}
+      {activeTab === "categories" && (
+        <CategoryChart onSliceClick={explainCategory} />
+      )}
+      {activeTab === "monthly" && <MonthlyChart onPointClick={explainMonth} />}
+      {activeTab === "vendors" && <VendorChart onBarClick={explainVendor} />}
     </div>
   );
 }
