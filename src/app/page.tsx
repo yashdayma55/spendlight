@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import WelcomeScreen from "@/components/WelcomeScreen";
 import Charts from "@/components/Charts";
 import ChatBox from "@/components/ChatBox";
 import StoryMode from "@/components/StoryMode";
@@ -114,10 +115,20 @@ function HomeContent({
 
 export default function Home() {
   const [logs, setLogs] = useState<GovernanceLogType[]>([]);
+  const [showWelcome, setShowWelcome] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowWelcome(false), 1800);
+    return () => clearTimeout(timer);
+  }, []);
 
   const addLog = (log: GovernanceLogType) => {
     setLogs((prev) => [...prev, log]);
   };
+
+  if (showWelcome) {
+    return <WelcomeScreen />;
+  }
 
   return (
     <PennyProvider onNewLog={addLog}>

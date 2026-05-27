@@ -12,7 +12,7 @@ import { PennyCharacter, type PennyAnimation } from "./Penny";
 import type { GovernanceLog } from "./GovernanceLog";
 
 export const PENNY_INTRO =
-  "Hi! I'm Penny, your spending guide 👋 Washington State spent $29.5B in FY2022 across 65,494 vendors. Click any chart bar, data point, or pie slice and I'll explain exactly what it means in plain English!";
+  "Hi! I'm Penny 👋 I'm your guide to Washington State's $29.5B budget. Start by clicking 'Find the story' to see the biggest findings — or click any chart bar and I'll explain what it means. You can also just ask me anything!";
 
 function ThinkingBubble() {
   return (

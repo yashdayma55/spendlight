@@ -10,7 +10,12 @@ export default function PennyIntro() {
   useEffect(() => {
     if (started.current) return;
     started.current = true;
-    penny.showIntroduction();
+
+    const timer = setTimeout(() => {
+      penny.showIntroduction();
+    }, 2000);
+
+    return () => clearTimeout(timer);
   }, [penny]);
 
   return null;
